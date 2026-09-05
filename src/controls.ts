@@ -1,5 +1,5 @@
 import { downloadPng, downloadSvg } from './export';
-import { formatLat, formatLon, wrapLon } from './geo';
+import { countryName, formatLat, formatLon, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
 import type { AppState } from './state';
@@ -97,6 +97,7 @@ export function wireControls(host: ControlsHost): void {
   spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
 
   wireMapDrag(host, stopSpin);
+  wireCountryTip(host);
 
   must<HTMLButtonElement>('#toggle-south').addEventListener('click', () => {
     host.setState({ southUp: !host.getState().southUp }, true);
@@ -109,6 +110,7 @@ export function wireControls(host: ControlsHost): void {
   const toggles: ReadonlyArray<[string, keyof AppState]> = [
     ['#toggle-graticule', 'showGraticule'],
     ['#toggle-tissot', 'showTissot'],
+    ['#toggle-countries', 'showCountries'],
   ];
   for (const [selector, key] of toggles) {
     const box = must<HTMLInputElement>(selector);
@@ -135,12 +137,14 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
   let dragging = false;
   let startX = 0;
   let startY = 0;
+  let moved = false;
   let startLon = 0;
   let startLat = 0;
 
   map.addEventListener('pointerdown', (ev) => {
     if (ev.button !== 0) return;
     dragging = true;
+    moved = false;
     startX = ev.clientX;
     startY = ev.clientY;
     startLon = host.getState().lon;
@@ -159,6 +163,8 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
     const width = map.getBoundingClientRect().width;
     if (width === 0) return;
     // 南が上のときは地図が 180° 回っているので、指の動きと経緯の対応が両軸とも逆になる
+    if (Math.hypot(ev.clientX - startX, ev.clientY - startY) > 4) moved = true;
+    if (!moved) return;
     const sign = host.getState().southUp ? -1 : 1;
     const dx = (ev.clientX - startX) * sign;
     // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる
@@ -172,16 +178,75 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
     host.setState(patch, false);
   });
 
-  const finish = (): void => {
+  const finish = (ev?: PointerEvent): void => {
     if (!dragging) return;
     dragging = false;
     map.classList.remove('dragging');
+    if (!moved) {
+      // 動かさずに離した = タップ。スマホ向けに国名を出す (hover が無いので)
+      if (ev !== undefined) map.dispatchEvent(new CustomEvent('maptap', { detail: { x: ev.clientX, y: ev.clientY } }));
+      return;
+    }
     const s = host.getState();
     host.setState({ lon: Math.round(s.lon), lat: Math.round(s.lat) }, true);
   };
   map.addEventListener('pointerup', finish);
   map.addEventListener('pointercancel', finish);
   map.addEventListener('lostpointercapture', finish);
+}
+
+/**
+ * 国名の吹き出し。PC は hover で追従、スマホはタップで 2.5 秒表示。
+ * 当たり判定は map.ts が国ごとに置く透明 path (data-key)。
+ */
+function wireCountryTip(host: ControlsHost): void {
+  const map = must<SVGSVGElement>('#map');
+  const wrap = must<HTMLElement>('.map-wrap');
+  const tip = must<HTMLElement>('#country-tip');
+  let hideTimer = 0;
+
+  function keyAt(x: number, y: number): string | null {
+    const node = document.elementFromPoint(x, y);
+    const path = node?.closest<SVGPathElement>('.countries path');
+    return path?.dataset['key'] ?? null;
+  }
+
+  function showAt(x: number, y: number, key: string): void {
+    const r = wrap.getBoundingClientRect();
+    tip.textContent = countryName(key, host.getState().lang);
+    tip.style.left = `${x - r.left}px`;
+    tip.style.top = `${y - r.top}px`;
+    tip.hidden = false;
+  }
+
+  function hide(): void {
+    tip.hidden = true;
+  }
+
+  map.addEventListener('pointermove', (ev) => {
+    if (ev.pointerType !== 'mouse' || !host.getState().showCountries) return;
+    if (ev.buttons !== 0) {
+      hide();
+      return;
+    }
+    const key = keyAt(ev.clientX, ev.clientY);
+    if (key === null) hide();
+    else showAt(ev.clientX, ev.clientY, key);
+  });
+  map.addEventListener('pointerleave', hide);
+
+  map.addEventListener('maptap', (ev) => {
+    if (!host.getState().showCountries) return;
+    const { x, y } = (ev as CustomEvent<{ x: number; y: number }>).detail;
+    const key = keyAt(x, y);
+    window.clearTimeout(hideTimer);
+    if (key === null) {
+      hide();
+      return;
+    }
+    showAt(x, y, key);
+    hideTimer = window.setTimeout(hide, 2500);
+  });
 }
 
 /** state の値を各コントロールの表示に反映する (描画のたびに呼ぶ)。 */
@@ -212,6 +277,7 @@ export function syncControlsUi(state: AppState): void {
   }
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
+  must<HTMLInputElement>('#toggle-countries').checked = state.showCountries;
   must<HTMLButtonElement>('#toggle-south').setAttribute('aria-pressed', state.southUp ? 'true' : 'false');
 
   const oblique = findProjection(state.projectionId).oblique === true;

@@ -9,8 +9,8 @@ if (svg === null) throw new Error('#map が見つかりません');
 
 const state: AppState = readStateFromUrl();
 
-function render(): void {
-  renderInto(svg as SVGSVGElement, state, currentTheme());
+function render(commit = true): void {
+  renderInto(svg as SVGSVGElement, state, currentTheme(), { updateHitPaths: commit });
   syncControlsUi(state);
 }
 
@@ -20,7 +20,7 @@ function render(): void {
  */
 function setState(patch: Partial<AppState>, commit = true): void {
   Object.assign(state, patch);
-  render();
+  render(commit);
   if (commit) syncUrl(state);
 }
 

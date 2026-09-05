@@ -1,5 +1,5 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
-import { GRATICULE, LAND, SPHERE, tissotCircles } from './geo';
+import { BORDERS, COUNTRIES, GRATICULE, LAND, SPHERE, tissotCircles } from './geo';
 import { findProjection, type ProjectionDef } from './projections';
 import type { AppState } from './state';
 import type { Theme } from './theme';
@@ -55,6 +55,9 @@ interface MapNodes {
   ocean: SVGPathElement;
   graticule: SVGPathElement;
   land: SVGPathElement;
+  borders: SVGPathElement;
+  /** 国名 hover / tap 用の当たり判定 (画面用 SVG だけ、書き出しには入れない) */
+  countries: SVGGElement | null;
   tissot: SVGGElement;
   outline: SVGPathElement;
 }
@@ -68,7 +71,7 @@ function el<K extends keyof SVGElementTagNameMap>(tag: K, cls?: string): SVGElem
 }
 
 /** 初回だけ DOM を組み立て、以降は同じ要素の d 属性を書き換える。 */
-function ensureNodes(svg: SVGSVGElement): MapNodes {
+function ensureNodes(svg: SVGSVGElement, interactive: boolean): MapNodes {
   const cached = nodeCache.get(svg);
   if (cached) return cached;
 
@@ -77,20 +80,23 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     ocean: el('path', 'ocean'),
     graticule: el('path', 'graticule'),
     land: el('path', 'land'),
+    borders: el('path', 'border'),
+    countries: interactive ? el('g', 'countries') : null,
     tissot: el('g', 'tissot'),
     outline: el('path', 'outline'),
   };
   for (let i = 0; i < TISSOT.length; i += 1) nodes.tissot.appendChild(el('path'));
+  if (nodes.countries !== null) {
+    for (const c of COUNTRIES) {
+      const p = el('path');
+      p.dataset['key'] = c.properties.key;
+      nodes.countries.appendChild(p);
+    }
+  }
 
-  // 重ね順: 海 → 経緯線 → 陸 → ティソー → 外郭
-  svg.append(
-    nodes.style,
-    nodes.ocean,
-    nodes.graticule,
-    nodes.land,
-    nodes.tissot,
-    nodes.outline,
-  );
+  // 重ね順: 海 → 経緯線 → 陸 → 国境 → ティソー → 外郭 → (当たり判定)
+  svg.append(nodes.style, nodes.ocean, nodes.graticule, nodes.land, nodes.borders, nodes.tissot, nodes.outline);
+  if (nodes.countries !== null) svg.append(nodes.countries);
   nodeCache.set(svg, nodes);
   return nodes;
 }
@@ -100,6 +106,8 @@ function svgCss(theme: Theme): string {
     `.ocean{fill:${theme.ocean}}`,
     `.land{fill:${theme.land};stroke:${theme.landStroke};stroke-width:.5}`,
     `.graticule{fill:none;stroke:${theme.graticule};stroke-width:.6}`,
+    `.border{fill:none;stroke:${theme.border};stroke-width:.6;stroke-linejoin:round}`,
+    `.countries path{fill:transparent;stroke:none}`,
     `.tissot path{fill:${theme.tissotFill};stroke:${theme.tissotStroke};stroke-width:.7}`,
     `.outline{fill:none;stroke:${theme.outline};stroke-width:1.2}`,
   ].join('');
@@ -115,7 +123,22 @@ function show(node: SVGElement, visible: boolean): void {
  *
  * @returns 描画高さ (SVG 座標)
  */
-export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): number {
+export interface RenderOptions {
+  /** 国名 hover / tap の当たり判定 path を持つか (画面用 SVG のみ true、書き出しは false) */
+  interactive?: boolean;
+  /**
+   * 当たり判定 path の d を更新するか。ドラッグ / 回転中 (commit=false) は 177 本の再計算を
+   * 飛ばして描画を軽くし、止まった時 (commit=true) にだけ揃える。
+   */
+  updateHitPaths?: boolean;
+}
+
+export function renderInto(
+  svg: SVGSVGElement,
+  state: AppState,
+  theme: Theme,
+  { interactive = true, updateHitPaths = true }: RenderOptions = {},
+): number {
   const def = findProjection(state.projectionId);
   const { projection, height } = getFitted(def);
 
@@ -125,7 +148,7 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   projection.rotate([-state.lon, def.oblique ? -state.lat : 0, state.southUp ? 180 : 0]);
   pathGen.projection(projection);
 
-  const nodes = ensureNodes(svg);
+  const nodes = ensureNodes(svg, interactive);
   svg.setAttribute('viewBox', `0 0 ${MAP_WIDTH} ${height}`);
   nodes.style.textContent = svgCss(theme);
 
@@ -138,6 +161,18 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   if (state.showGraticule) nodes.graticule.setAttribute('d', pathGen(GRATICULE) ?? '');
 
   nodes.land.setAttribute('d', pathGen(LAND) ?? '');
+
+  show(nodes.borders, state.showCountries);
+  if (state.showCountries) nodes.borders.setAttribute('d', pathGen(BORDERS) ?? '');
+  if (nodes.countries !== null) {
+    show(nodes.countries, state.showCountries);
+    if (state.showCountries && updateHitPaths) {
+      const children = nodes.countries.children;
+      COUNTRIES.forEach((c, i) => {
+        children.item(i)?.setAttribute('d', pathGen(c) ?? '');
+      });
+    }
+  }
 
   show(nodes.tissot, state.showTissot);
   if (state.showTissot) {
@@ -156,7 +191,7 @@ export function buildStandaloneSvg(
   theme: Theme,
 ): { svg: SVGSVGElement; width: number; height: number } {
   const svg = document.createElementNS(SVG_NS, 'svg');
-  const height = renderInto(svg, state, theme);
+  const height = renderInto(svg, state, theme, { interactive: false });
   svg.setAttribute('xmlns', SVG_NS);
   svg.setAttribute('width', String(MAP_WIDTH));
   svg.setAttribute('height', String(height));

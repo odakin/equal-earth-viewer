@@ -164,6 +164,21 @@ button[aria-pressed='true'] {
 
 .map-wrap {
   margin-bottom: 1rem;
+  position: relative;
+}
+
+/* 国名の吹き出し (hover / tap) */
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 0.85em;
+  line-height: 1.3;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  transform: translate(-50%, -130%);
 }
 
 .inline-field {

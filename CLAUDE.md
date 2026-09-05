@@ -20,7 +20,7 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 
 ## 配布
 
-`npm run build` の成果物は **`docs/index.html` ただ 1 つ** (約 94 KB)。JS / CSS / 海岸線 TopoJSON を
+`npm run build` の成果物は **`docs/index.html` ただ 1 つ** (約 160 KB)。JS / CSS / 海岸線 TopoJSON を
 すべて inline 済み (UI 文字列の ja / en 両方を含む) なので、以下のいずれでもそのまま動く:
 
 - ファイルをダブルクリック (`file://` で開く。ビルド環境もネットワークも不要)
@@ -38,7 +38,8 @@ src/
   state.ts          AppState の型と URL 同期
   i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
   projections.ts    図法の定義一覧 (名前・族・ファクトリ・極が線か。すべて正積 = verify.mjs F が実測)
-  geo.ts            陸地 / 経緯線 / ティソー円の GeoJSON
+  geo.ts            国 / 陸地 (= 国の merge) / 国境 / 経緯線 / ティソー円の GeoJSON + 国名 lookup
+  data/country-names.json  国 key → {en, ja} (Natural Earth 110m admin_0 の NAME / NAME_JA から生成、177 か国)
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
   export.ts         SVG / PNG 書き出し
@@ -58,7 +59,7 @@ src/
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
 | `lat` | 中心緯度 (-90〜90)。方位図法 (`oblique`) のときだけ効く。既定 0 |
 | `proj` | `projections.ts` の id (11 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
-| `grat` `tissot` | 経緯線 / ティソー円の表示 (`1` / `0`)。陸地は常に描く |
+| `grat` `tissot` `countries` | 経緯線 / ティソー円 / 国境+国名 の表示 (`1` / `0`)。陸地は常に描く |
 | `south` | `1` で南を上に (地図全体を 180° 回転、鏡像ではない) |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 

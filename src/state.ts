@@ -9,6 +9,8 @@ export interface AppState {
   projectionId: string;
   showGraticule: boolean;
   showTissot: boolean;
+  /** 国境線 + 触ると国名 */
+  showCountries: boolean;
   /** 南を上にする (地図全体を 180° 回転。鏡像ではない) */
   southUp: boolean;
   /** UI 言語。既定は navigator.language から判定 */
@@ -22,6 +24,7 @@ export const DEFAULT_STATE: Readonly<AppState> = {
   projectionId: 'equal-earth',
   showGraticule: true,
   showTissot: false,
+  showCountries: false,
   southUp: false,
   lang: detectLang(),
 };
@@ -51,6 +54,7 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
 
   state.showGraticule = parseBool(q.get('grat'), DEFAULT_STATE.showGraticule);
   state.showTissot = parseBool(q.get('tissot'), DEFAULT_STATE.showTissot);
+  state.showCountries = parseBool(q.get('countries'), DEFAULT_STATE.showCountries);
   state.southUp = parseBool(q.get('south'), DEFAULT_STATE.southUp);
 
   const lang = q.get('lang');
@@ -70,6 +74,7 @@ export function stateToQuery(state: AppState): string {
   if (state.projectionId !== DEFAULT_STATE.projectionId) q.set('proj', state.projectionId);
   if (state.showGraticule !== DEFAULT_STATE.showGraticule) q.set('grat', state.showGraticule ? '1' : '0');
   if (state.showTissot !== DEFAULT_STATE.showTissot) q.set('tissot', state.showTissot ? '1' : '0');
+  if (state.showCountries !== DEFAULT_STATE.showCountries) q.set('countries', state.showCountries ? '1' : '0');
   if (state.southUp !== DEFAULT_STATE.southUp) q.set('south', state.southUp ? '1' : '0');
   // 自動判定と同じ言語なら書かない (共有先の閲覧者は自分の言語で開ける)
   if (state.lang !== DEFAULT_STATE.lang) q.set('lang', state.lang);

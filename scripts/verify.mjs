@@ -22,13 +22,15 @@ import {
   geoSinusoidal,
   geoWagner7,
 } from 'd3-geo-projection';
-import { feature } from 'topojson-client';
+import { feature, merge } from 'topojson-client';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const landTopo = JSON.parse(
-  readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'land-110m.json'), 'utf8'),
+const countriesTopo = JSON.parse(
+  readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'countries-110m.json'), 'utf8'),
 );
-const LAND = feature(landTopo, landTopo.objects.land);
+// src/geo.ts と同じく、陸塊は国の merge
+const LAND = merge(countriesTopo, countriesTopo.objects.countries.geometries);
+const COUNTRY_NAMES = JSON.parse(readFileSync(join(here, '..', 'src', 'data', 'country-names.json'), 'utf8'));
 
 const WIDTH = 960;
 const SPHERE = { type: 'Sphere' };
@@ -189,6 +191,19 @@ for (const [id, make] of PROJECTIONS) {
   const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
   const spread = Math.max(...ratios.map((r) => Math.abs(r / mean - 1)));
   check(spread < 0.01, `${id}: 面積比のばらつき ${(spread * 100).toFixed(3)}%`, '許容 1%');
+}
+
+console.log('\nG. 国名表 (src/data/country-names.json) が world-atlas の全国を日英で覆う');
+{
+  const geoms = countriesTopo.objects.countries.geometries;
+  const missing = geoms
+    .map((g) => (g.id === undefined ? `n:${g.properties.name}` : String(g.id)))
+    .filter((key) => !COUNTRY_NAMES[key] || !COUNTRY_NAMES[key].ja || !COUNTRY_NAMES[key].en);
+  check(missing.length === 0, `${geoms.length} か国すべてに ja / en の名前がある`, missing.join(', '));
+  check(COUNTRY_NAMES['392']?.ja === '日本', `id 392 = ${COUNTRY_NAMES['392']?.ja}`);
+  const landTopo = JSON.parse(readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'land-110m.json'), 'utf8'));
+  const a = geoArea(LAND), b = geoArea(feature(landTopo, landTopo.objects.land));
+  check(Math.abs(a - b) / b < 1e-3, `国の merge の面積 ${a.toFixed(5)} sr ≒ land-110m ${b.toFixed(5)} sr (陸塊を国から作ってよい)`);
 }
 
 console.log('\nD. 全図法で陸地・外郭の path が生成できる');

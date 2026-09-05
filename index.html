@@ -17,6 +17,7 @@
 
     <div class="wrap map-wrap">
       <svg id="map" role="img" data-i18n-aria="map.aria" aria-label="選択した図法で描いた世界地図"></svg>
+      <div id="country-tip" class="tip" role="status" hidden></div>
     </div>
 
     <section class="wrap panel" data-i18n-aria="panel.lon.aria" aria-label="中央経線の操作">
@@ -70,6 +71,7 @@
       <div class="row toggles">
         <label><input type="checkbox" id="toggle-graticule" checked /> <span data-i18n="toggle.graticule">経緯線</span></label>
         <label><input type="checkbox" id="toggle-tissot" /> <span data-i18n="toggle.tissot">ティソーの指示楕円</span></label>
+        <label><input type="checkbox" id="toggle-countries" /> <span data-i18n="toggle.countries">国境 (触ると国名)</span></label>
       </div>
 
       <div class="row">

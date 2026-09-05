@@ -1,18 +1,50 @@
 import { t, type Lang } from './i18n';
 import { geoGraticule, geoCircle, type GeoSphere } from 'd3-geo';
-import { feature } from 'topojson-client';
-import type { FeatureCollection, Geometry, MultiLineString, Polygon } from 'geojson';
-import landTopo from 'world-atlas/land-110m.json';
+import { feature, merge, mesh } from 'topojson-client';
+import type { Feature, Geometry, MultiLineString, MultiPolygon, Polygon } from 'geojson';
+import type { MultiPolygon as TopoMultiPolygon, Polygon as TopoPolygon } from 'topojson-specification';
+import countriesTopo from 'world-atlas/countries-110m.json';
+import countryNames from './data/country-names.json';
 
 /** 地図の外郭 (投影された地球全体の輪郭)。 */
 export const SPHERE: GeoSphere = { type: 'Sphere' };
 
 /**
- * 陸塊。world-atlas の land-110m は国境を含まない陸地そのものなので、
- * countries + topojson.merge と同じ結果がそのまま手に入る (かつ約半分のサイズ)。
- * TopoJSON → GeoJSON の変換は module 評価時の 1 回だけ。
+ * 国 (Natural Earth 110m、world-atlas 同梱)。陸塊はこれを merge して作る
+ * (land-110m と面積が一致することを確認済、二重に持たない)。TopoJSON → GeoJSON は module 評価時の 1 回。
  */
-export const LAND = feature(landTopo, landTopo.objects.land) as FeatureCollection<Geometry>;
+const countryGeoms = countriesTopo.objects.countries;
+
+/** 国の識別 key。ISO 3166-1 numeric、無いもの (コソボ等 3 国) は名前で代用。 */
+function countryKey(id: string | number | undefined, name: string): string {
+  return id === undefined ? `n:${name}` : String(id);
+}
+
+export interface CountryFeature extends Feature<Geometry, { key: string }> {}
+
+export const COUNTRIES: CountryFeature[] = feature(countriesTopo, countryGeoms).features.map((f) => ({
+  type: 'Feature',
+  geometry: f.geometry,
+  properties: { key: countryKey(f.id, f.properties.name) },
+}));
+
+/** 陸塊 = 全国の結合。 */
+export const LAND: MultiPolygon = merge(
+  countriesTopo,
+  countryGeoms.geometries as Array<TopoPolygon | TopoMultiPolygon>,
+);
+
+/** 国境線 = 2 国が接する弧だけ (海岸線は含めない)。 */
+export const BORDERS: MultiLineString = mesh(countriesTopo, countryGeoms, (a, b) => a !== b);
+
+const NAMES = countryNames as Record<string, { en: string; ja: string }>;
+
+/** 国名 (Natural Earth の NAME / NAME_JA)。 */
+export function countryName(key: string, lang: Lang): string {
+  const n = NAMES[key];
+  if (n === undefined) return key;
+  return lang === 'ja' ? n.ja : n.en;
+}
 
 /** 30° 間隔の経緯線。極まで引くので図法ごとの極の扱い (点 / 線) が見える。 */
 export const GRATICULE: MultiLineString = geoGraticule()
