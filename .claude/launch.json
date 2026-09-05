@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "equal-earth-viewer",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "export PATH=\"$HOME/.nvm/versions/node/v20.20.0/bin:$PATH\" && npx vite --port 5173 --strictPort"],
+      "port": 5173
+    }
+  ]
+}
