@@ -20,7 +20,7 @@
     </div>
 
     <section class="wrap panel" data-i18n-aria="panel.lon.aria" aria-label="中央経線の操作">
-      <div class="row">
+      <div class="row lon-control">
         <label for="lon-slider" data-i18n="lon.label">中央経線</label>
         <input id="lon-slider" class="grow" type="range" min="-180" max="180" step="1" value="-90" />
         <input
@@ -41,13 +41,14 @@
         <span><span data-i18n="readout.seam">裂け目</span> <strong id="seam-readout">—</strong></span>
       </div>
 
-      <div class="row">
+      <div class="row lon-control">
         <button class="preset" type="button" data-lon="-90" data-i18n="preset.americas">アメリカ中心 西経90°</button>
         <button class="preset" type="button" data-lon="150" data-i18n="preset.pacific">太平洋中心 東経150°</button>
         <button class="preset" type="button" data-lon="0" data-i18n="preset.europe">ヨーロッパ・アフリカ中心 0°</button>
         <button id="spin" type="button" aria-pressed="false">回す</button>
       </div>
-      <p class="note" data-i18n="drag.hint">地図を左右にドラッグ (スワイプ) しても回せます。</p>
+      <p id="lon-fixed-note" class="note warn" data-i18n="lon.fixed" hidden>この図法は中央経線が 0° に固定 (断裂の位置が設計の一部)</p>
+      <p id="drag-hint" class="note" data-i18n="drag.hint">地図を左右にドラッグ (スワイプ) しても回せます。</p>
     </section>
 
     <section class="wrap panel" data-i18n-aria="panel.view.aria" aria-label="表示の設定">

@@ -105,6 +105,19 @@ h1 {
   font-size: 0.9em;
 }
 
+.note.warn {
+  color: var(--fg);
+}
+
+.lon-fixed .lon-control {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.lon-fixed #map {
+  cursor: default;
+}
+
 .toggles {
   gap: 1rem;
 }

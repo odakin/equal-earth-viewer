@@ -11,6 +11,7 @@
   `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
 - **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
+- **グード断裂は中央経線 0° 固定** (d3 の断裂は回転座標に固定 → 回すと大陸が切れる、user 指摘。操作系無効化 + 注記。DESIGN.md)
 - **図法を 15 種に拡張** (代表的な正積図法を全部、族別 optgroup。正積であることを verify.mjs F がティソー円面積比で実測。DESIGN.md)
 - **綿密チェック (user 指摘)**: イコールアースの極は線 (点は誤り) / Gall-Peters の歪み方向 / Europe プリセット 0° / 出典表記 を訂正、表 = DESIGN.md 末尾
 - **日本語 UI の英字排除** (図法名・タイトル・プリセット経度を和文表記、SVG/PNG と出典は例外)

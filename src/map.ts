@@ -1,6 +1,6 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
 import { EQUATOR, GRATICULE, LAND, SPHERE, meridian, tissotCircles } from './geo';
-import { findProjection, type ProjectionDef } from './projections';
+import { effectiveLon, findProjection, type ProjectionDef } from './projections';
 import type { AppState } from './state';
 import type { Theme } from './theme';
 
@@ -127,7 +127,9 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   const { projection, height } = getFitted(def);
 
   // 中央経線の指定は rotate の第 1 引数のみ。反子午線クリップは d3-geo に任せる。
-  projection.rotate([-state.lon, 0, 0]);
+  // 断裂図法は中央経線を固定 (projections.ts の fixedLon)。
+  const lon = effectiveLon(def, state.lon);
+  projection.rotate([-lon, 0, 0]);
   pathGen.projection(projection);
 
   const nodes = ensureNodes(svg);
@@ -139,7 +141,7 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   nodes.ocean.setAttribute('d', spherePath);
   nodes.outline.setAttribute('d', spherePath);
   nodes.equator.setAttribute('d', pathGen(EQUATOR) ?? '');
-  nodes.meridian.setAttribute('d', pathGen(meridian(state.lon)) ?? '');
+  nodes.meridian.setAttribute('d', pathGen(meridian(lon)) ?? '');
 
   show(nodes.graticule, state.showGraticule);
   if (state.showGraticule) nodes.graticule.setAttribute('d', pathGen(GRATICULE) ?? '');

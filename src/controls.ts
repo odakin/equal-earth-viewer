@@ -1,7 +1,7 @@
 import { downloadPng, downloadSvg } from './export';
 import { formatLon, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
-import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
+import { FAMILIES, PROJECTIONS, describeProjection, effectiveLon, findProjection } from './projections';
 import type { AppState } from './state';
 
 /** 「回す」の角速度 (度/秒)。 */
@@ -61,6 +61,7 @@ export function wireControls(host: ControlsHost): void {
 
   function startSpin(): void {
     if (spinning) return;
+    if (findProjection(host.getState().projectionId).fixedLon !== undefined) return;
     spinning = true;
     lastTime = 0;
     spinBtn.textContent = t(host.getState().lang, 'spin.stop');
@@ -126,6 +127,7 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
 
   map.addEventListener('pointerdown', (ev) => {
     if (ev.button !== 0) return;
+    if (findProjection(host.getState().projectionId).fixedLon !== undefined) return;
     dragging = true;
     startX = ev.clientX;
     startLon = host.getState().lon;
@@ -170,7 +172,7 @@ export function syncControlsUi(state: AppState): void {
       spinBtn.textContent = t(state.lang, 'spin.stop');
     }
   }
-  const rounded = Math.round(state.lon);
+  const rounded = Math.round(effectiveLon(findProjection(state.projectionId), state.lon));
   const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
 
@@ -190,8 +192,19 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
 
-  must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon, state.lang);
-  must<HTMLElement>('#seam-readout').textContent = formatLon(state.lon + 180, state.lang);
+  const def = findProjection(state.projectionId);
+  const fixed = def.fixedLon !== undefined;
+  const lon = effectiveLon(def, state.lon);
+  document.body.classList.toggle('lon-fixed', fixed);
+  must<HTMLElement>('#lon-fixed-note').hidden = !fixed;
+  must<HTMLElement>('#drag-hint').hidden = fixed;
+  for (const el of document.querySelectorAll<HTMLInputElement | HTMLButtonElement>('.lon-control input, .lon-control button')) {
+    el.disabled = fixed;
+  }
+  must<HTMLElement>('#lon-readout').textContent = formatLon(lon, state.lang);
+  must<HTMLElement>('#seam-readout').textContent = fixed
+    ? t(state.lang, 'seam.interrupted')
+    : formatLon(lon + 180, state.lang);
   must<HTMLElement>('#proj-note').textContent = describeProjection(
     findProjection(state.projectionId),
     state.lang,

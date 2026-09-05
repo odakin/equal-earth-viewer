@@ -1,5 +1,5 @@
 import { buildStandaloneSvg } from './map';
-import { findProjection } from './projections';
+import { effectiveLon, findProjection } from './projections';
 import type { AppState } from './state';
 import { themes } from './theme';
 
@@ -7,7 +7,7 @@ import { themes } from './theme';
 const EXPORT_THEME = themes.light;
 
 function baseName(state: AppState): string {
-  const lon = Math.round(state.lon);
+  const lon = Math.round(effectiveLon(findProjection(state.projectionId), state.lon));
   const label = lon === 0 ? '0' : `${Math.abs(lon)}${lon > 0 ? 'E' : 'W'}`;
   return `${findProjection(state.projectionId).id}_lon${label}`;
 }
