@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Equal Earth 図法ビューア — 中央経線を動かして世界地図の裂け目を観察する教材",
+  "description": "Equal Earth 図法ビューア — 正積の世界地図を、中央経線を動かして眺める教材",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
