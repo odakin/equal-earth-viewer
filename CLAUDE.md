@@ -56,6 +56,7 @@ src/
 | キー | 意味 |
 |---|---|
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
+| `lat` | 中心緯度 (-90〜90)。方位図法 (`oblique`) のときだけ効く。既定 0 |
 | `proj` | `projections.ts` の id (14 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / eckert6 / wagner4 / boggs / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
@@ -66,7 +67,8 @@ src/
   標準クリップに任せ、ポリゴンを自前で分割しない。
 - **`map.ts` は図法ごとに `fitWidth` を 1 回だけ実行して拡大率と高さをキャッシュする。** これは
   「経度回転では投影された球の外郭が合同」という性質に依存している。斜軸投影 (rotate の第 2・第 3
-  引数) を導入するとこの前提が崩れるので、そのときはキャッシュ設計から見直すこと。前提は
+  引数) を導入するとこの前提が崩れるので、そのときはキャッシュ設計から見直すこと。例外は
+  `oblique: true` の方位図法で、外郭が常に円なので第 2 引数 (中心緯度) を使っても無事 (項目 A2)。前提は
   `npm test` の項目 A が実測で守っている (擬円錐・方位でも成立することを確認済)。
 - **図法を追加したら `scripts/verify.mjs` の PROJECTIONS 鏡にも足す** (極の扱い E / 正積 F / 外郭不変 A を実測で検査)。
 - **地図の色は `theme.ts` が正本** (CSS 変数ではない)。SVG / PNG 書き出しでは外部 CSS が効かないため、

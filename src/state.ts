@@ -1,9 +1,11 @@
 import { detectLang, isLang, type Lang } from './i18n';
-import { PROJECTIONS } from './projections';
+import { PROJECTIONS, findProjection } from './projections';
 
 export interface AppState {
   /** 中央経線 [-180, 180]。アニメーション中は連続値を取る。 */
   lon: number;
+  /** 中心緯度 [-90, 90]。方位図法 (oblique) のときだけ描画に効く */
+  lat: number;
   projectionId: string;
   showGraticule: boolean;
   showLand: boolean;
@@ -15,6 +17,7 @@ export interface AppState {
 export const DEFAULT_STATE: Readonly<AppState> = {
   // 既定はアメリカ中心 90°W (Patterson の Equal Earth 壁地図 3 版のうち Americas 版の中央経線)
   lon: -90,
+  lat: 0,
   projectionId: 'equal-earth',
   showGraticule: true,
   showLand: true,
@@ -38,6 +41,10 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
   const lon = lonRaw === null ? Number.NaN : Number(lonRaw);
   if (Number.isFinite(lon)) state.lon = Math.max(-180, Math.min(180, lon));
 
+  const latRaw = q.get('lat');
+  const lat = latRaw === null ? Number.NaN : Number(latRaw);
+  if (Number.isFinite(lat)) state.lat = Math.max(-90, Math.min(90, lat));
+
   const proj = q.get('proj');
   if (proj !== null && PROJECTIONS.some((p) => p.id === proj)) state.projectionId = proj;
 
@@ -56,6 +63,9 @@ export function stateToQuery(state: AppState): string {
   const q = new URLSearchParams();
   const lon = Math.round(state.lon);
   if (lon !== DEFAULT_STATE.lon) q.set('lon', String(lon));
+  // lat は方位図法でしか効かないので、それ以外の図法では URL に書かない (値自体は state に保持)
+  const lat = Math.round(state.lat);
+  if (lat !== DEFAULT_STATE.lat && findProjection(state.projectionId).oblique) q.set('lat', String(lat));
   if (state.projectionId !== DEFAULT_STATE.projectionId) q.set('proj', state.projectionId);
   if (state.showGraticule !== DEFAULT_STATE.showGraticule) q.set('grat', state.showGraticule ? '1' : '0');
   if (state.showLand !== DEFAULT_STATE.showLand) q.set('land', state.showLand ? '1' : '0');

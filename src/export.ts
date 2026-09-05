@@ -9,7 +9,10 @@ const EXPORT_THEME = themes.light;
 function baseName(state: AppState): string {
   const lon = Math.round(state.lon);
   const label = lon === 0 ? '0' : `${Math.abs(lon)}${lon > 0 ? 'E' : 'W'}`;
-  return `${findProjection(state.projectionId).id}_lon${label}`;
+  const def = findProjection(state.projectionId);
+  const lat = Math.round(state.lat);
+  const latLabel = def.oblique && lat !== 0 ? `_lat${Math.abs(lat)}${lat > 0 ? 'N' : 'S'}` : '';
+  return `${def.id}_lon${label}${latLabel}`;
 }
 
 function triggerDownload(blob: Blob, filename: string): void {

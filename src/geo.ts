@@ -63,6 +63,13 @@ export function wrapLon(lon: number): number {
   return ((((lon + 180) % 360) + 360) % 360) - 180;
 }
 
+/** 緯度の表記 (方位図法の中心緯度)。 */
+export function formatLat(lat: number, lang: Lang = 'ja'): string {
+  const x = Math.round(Math.max(-90, Math.min(90, lat)));
+  if (x === 0) return t(lang, 'lat.equator');
+  return x > 0 ? t(lang, 'lat.north', { n: x }) : t(lang, 'lat.south', { n: -x });
+}
+
 /** 経度を教材向けの日本語表記に。 */
 export function formatLon(lon: number, lang: Lang = 'ja'): string {
   const x = Math.round(wrapLon(lon));

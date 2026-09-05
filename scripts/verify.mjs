@@ -84,6 +84,21 @@ for (const [id, create] of PROJECTIONS) {
   check(drift < 0.5, `${id}: bounds drift ${drift.toFixed(4)} px`, `幅 ${WIDTH}px に対して`);
 }
 
+console.log('\nA2. 方位図法は中心緯度を変えても外郭 bounds が動かない (oblique の前提)');
+{
+  const { projection, path } = fitted(() => geoAzimuthalEqualArea());
+  const base = path.bounds(SPHERE).flat();
+  let drift = 0;
+  for (let lat = -90; lat <= 90; lat += 15) {
+    for (let lon = -180; lon <= 180; lon += 45) {
+      projection.rotate([-lon, -lat, 0]);
+      const b = path.bounds(SPHERE).flat();
+      for (let i = 0; i < 4; i += 1) drift = Math.max(drift, Math.abs(b[i] - base[i]));
+    }
+  }
+  check(drift < 0.5, `lambert-azimuthal: 緯度 × 経度 回転での bounds drift ${drift.toFixed(4)} px`);
+}
+
 console.log('\nB. 受け入れ条件: 中央経線 150°E でグリーンランドが左右の縁に分断される');
 {
   const { projection } = fitted(() => geoEqualEarth());

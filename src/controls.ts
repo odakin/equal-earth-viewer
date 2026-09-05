@@ -1,5 +1,5 @@
 import { downloadPng, downloadSvg } from './export';
-import { formatLon, wrapLon } from './geo';
+import { formatLat, formatLon, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
 import type { AppState } from './state';
@@ -23,6 +23,8 @@ export function wireControls(host: ControlsHost): void {
   const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
   const spinBtn = must<HTMLButtonElement>('#spin');
+  const latSlider = must<HTMLInputElement>('#lat-slider');
+  const latNumber = must<HTMLInputElement>('#lat-number');
   // 図法はプルダウンでなく押しボタンの並び (族ごとに 1 行)。文言は syncControlsUi が言語に合わせて流し込む。
   const projList = must<HTMLElement>('#proj-list');
   for (const family of FAMILIES) {
@@ -89,6 +91,16 @@ export function wireControls(host: ControlsHost): void {
     btn.addEventListener('click', () => setLonByUser(Number(btn.dataset['lon'])));
   }
 
+  function setLatByUser(value: number): void {
+    if (!Number.isFinite(value)) return;
+    host.setState({ lat: Math.max(-90, Math.min(90, value)) }, true);
+  }
+  latSlider.addEventListener('input', () => setLatByUser(Number(latSlider.value)));
+  latNumber.addEventListener('input', () => setLatByUser(Number(latNumber.value)));
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset-lat')) {
+    btn.addEventListener('click', () => setLatByUser(Number(btn.dataset['lat'])));
+  }
+
   spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
 
   wireMapDrag(host, stopSpin);
@@ -118,20 +130,25 @@ export function wireControls(host: ControlsHost): void {
 /**
  * 地図を左右にドラッグ / スワイプして中央経線を動かす。
  * 地図の表示幅 = 経度 360° と見なし、動かした距離をそのまま経度に換算する
- * (指の下の経線がほぼ指に付いてくる)。縦方向は CSS の touch-action: pan-y で
- * ブラウザのスクロールに譲るので、ここでは水平成分だけを見る。
+ * (指の下の経線がほぼ指に付いてくる)。縦方向は通常 CSS の touch-action: pan-y で
+ * ブラウザのスクロールに譲る。方位図法 (oblique) のときだけ縦も中心緯度に使い、
+ * touch-action は syncControlsUi が none に切り替える。
  */
 function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
   const map = must<SVGSVGElement>('#map');
   let dragging = false;
   let startX = 0;
+  let startY = 0;
   let startLon = 0;
+  let startLat = 0;
 
   map.addEventListener('pointerdown', (ev) => {
     if (ev.button !== 0) return;
     dragging = true;
     startX = ev.clientX;
+    startY = ev.clientY;
     startLon = host.getState().lon;
+    startLat = host.getState().lat;
     stopSpin();
     try {
       map.setPointerCapture(ev.pointerId);
@@ -147,14 +164,22 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
     if (width === 0) return;
     const dx = ev.clientX - startX;
     // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる
-    host.setState({ lon: wrapLon(startLon - (dx / width) * 360) }, false);
+    const patch: Partial<AppState> = { lon: wrapLon(startLon - (dx / width) * 360) };
+    if (findProjection(host.getState().projectionId).oblique) {
+      // 下へ動かす = 指の下の点が下がる = 中心は北へ (緯度が増える)。表示高さ = 180° と見なす
+      const height = map.getBoundingClientRect().height;
+      const dy = ev.clientY - startY;
+      patch.lat = Math.max(-90, Math.min(90, startLat + (dy / height) * 180));
+    }
+    host.setState(patch, false);
   });
 
   const finish = (): void => {
     if (!dragging) return;
     dragging = false;
     map.classList.remove('dragging');
-    host.setState({ lon: Math.round(host.getState().lon) }, true);
+    const s = host.getState();
+    host.setState({ lon: Math.round(s.lon), lat: Math.round(s.lat) }, true);
   };
   map.addEventListener('pointerup', finish);
   map.addEventListener('pointercancel', finish);
@@ -193,6 +218,18 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
 
+  const oblique = findProjection(state.projectionId).oblique === true;
+  must<HTMLElement>('#lat-row').hidden = !oblique;
+  must<HTMLElement>('#lat-presets').hidden = !oblique;
+  must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
+  must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
+  must<SVGSVGElement>('#map').style.touchAction = oblique ? 'none' : 'pan-y';
+  const latRounded = Math.round(state.lat);
+  const latSlider = must<HTMLInputElement>('#lat-slider');
+  const latNumber = must<HTMLInputElement>('#lat-number');
+  if (document.activeElement !== latSlider) latSlider.value = String(latRounded);
+  if (document.activeElement !== latNumber) latNumber.value = String(latRounded);
+  must<HTMLElement>('#lat-readout').textContent = formatLat(state.lat, state.lang);
   must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon, state.lang);
   must<HTMLElement>('#seam-readout').textContent = formatLon(state.lon + 180, state.lang);
   must<HTMLElement>('#proj-note').textContent = describeProjection(

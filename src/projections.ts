@@ -24,6 +24,11 @@ export interface ProjectionDef {
   create: () => GeoProjection;
   /** 極が線として描かれるか (点なら false)。scripts/verify.mjs 項目 E が実測で守る */
   poleLine: boolean;
+  /**
+   * 中心を緯度方向にも動かせるか (方位図法)。擬円筒などは rotate の第 2 引数を入れると
+   * 外郭が変わり map.ts の fit キャッシュ前提が崩れるので false。方位図法は外郭が常に円で無事。
+   */
+  oblique?: boolean;
   note: Record<Lang, string>;
 }
 
@@ -187,9 +192,10 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     family: 'azimuthal',
     create: () => geoAzimuthalEqualArea(),
     poleLine: false,
+    oblique: true,
     note: {
-      ja: '1772 年。中心からの方位が正しい。全球を 1 枚の円に収めると、中心の対蹠点が外周の円に引き伸ばされる。',
-      en: '1772. Directions from the center are true. Mapping the whole globe into one disc stretches the antipode of the center into the outer circle.',
+      ja: '1772 年。中心からの方位が正しい。中心は緯度方向にも動かせる (北極中心が古典的)。全球を 1 枚の円に収めると、中心の対蹠点が外周の円に引き伸ばされる。',
+      en: '1772. Directions from the center are true. The center can also move in latitude (the polar aspect is the classic). Mapping the whole globe into one disc stretches the antipode of the center into the outer circle.',
     },
   },
 ];

@@ -127,7 +127,8 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   const { projection, height } = getFitted(def);
 
   // 中央経線の指定は rotate の第 1 引数のみ。反子午線クリップは d3-geo に任せる。
-  projection.rotate([-state.lon, 0, 0]);
+  // 方位図法だけ第 2 引数 (中心緯度) も使う。他は 0 固定 = fit キャッシュ前提の範囲内。
+  projection.rotate([-state.lon, def.oblique ? -state.lat : 0, 0]);
   pathGen.projection(projection);
 
   const nodes = ensureNodes(svg);
