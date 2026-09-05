@@ -20,47 +20,56 @@
       <div id="country-tip" class="tip" role="status" hidden></div>
     </div>
 
-    <section class="wrap panel" data-i18n-aria="panel.lon.aria" aria-label="中央経線の操作">
-      <div class="row">
-        <label for="lon-number" data-i18n="lon.label">中央経線</label>
-        <input
-          id="lon-number"
-          type="number"
-          min="-180"
-          max="180"
-          step="1"
-          value="-90"
-          data-i18n-aria="lon.number.aria" aria-label="中央経線(度)"
-        />
-        <span class="unit">°</span>
-        <span id="lat-row" class="inline-field" hidden>
-        <label for="lat-number" data-i18n="lat.label">中心緯度</label>
-        <input
-          id="lat-number"
-          type="number"
-          min="-90"
-          max="90"
-          step="1"
-          value="0"
-          data-i18n-aria="lat.number.aria" aria-label="中心緯度(度)"
-        />
-        <span class="unit">°</span>
-        </span>
+    <section class="wrap panel map-controls" data-i18n-aria="panel.lon.aria" aria-label="地図の見方">
+      <h2 class="control-heading" data-i18n="panel.lon.aria">地図の見方</h2>
+      <div class="preset-group" role="group" data-i18n-aria="preset.label" aria-label="中心位置">
+        <button class="preset" type="button" data-lon="-90" aria-pressed="true">
+          <span data-i18n="preset.americas">アメリカ</span><small data-i18n="preset.americas.lon">西経90°</small>
+        </button>
+        <button class="preset" type="button" data-lon="150" aria-pressed="false">
+          <span data-i18n="preset.pacific">太平洋</span><small data-i18n="preset.pacific.lon">東経150°</small>
+        </button>
+        <button class="preset" type="button" data-lon="0" aria-pressed="false">
+          <span data-i18n="preset.europe">ヨーロッパ・アフリカ</span><small>0°</small>
+        </button>
       </div>
+      <div class="coordinates">
+        <div class="row coordinate-inputs">
+          <span class="longitude-field">
+          <label for="lon-number" data-i18n="lon.label">中央経線</label>
+          <input
+            id="lon-number"
+            type="number"
+            min="-180"
+            max="180"
+            step="1"
+            value="-90"
+            data-i18n-aria="lon.number.aria" aria-label="中央経線(度)"
+          />
+          <span class="unit">°</span>
+          </span>
+          <span id="lat-row" class="inline-field" hidden>
+          <label for="lat-number" data-i18n="lat.label">中心緯度</label>
+          <input
+            id="lat-number"
+            type="number"
+            min="-90"
+            max="90"
+            step="1"
+            value="0"
+            data-i18n-aria="lat.number.aria" aria-label="中心緯度(度)"
+          />
+          <span class="unit">°</span>
+          </span>
+        </div>
 
-      <div class="row readouts">
-        <span><span data-i18n="readout.center">中央</span> <strong id="lon-readout">—</strong><span id="lat-readout-wrap" hidden> / <strong id="lat-readout">—</strong></span></span>
-        <span class="sep">/</span>
-        <span><span data-i18n="readout.seam">裂け目</span> <strong id="seam-readout">—</strong></span>
         <span id="zoom-readout" class="zoom"></span>
-      </div>
 
-      <div class="row">
-        <button class="preset" type="button" data-lon="-90" data-i18n="preset.americas">アメリカ中心 西経90°</button>
-        <button class="preset" type="button" data-lon="150" data-i18n="preset.pacific">太平洋中心 東経150°</button>
-        <button class="preset" type="button" data-lon="0" data-i18n="preset.europe">ヨーロッパ・アフリカ中心 0°</button>
+      </div>
+      <div class="map-options" role="group" data-i18n-aria="options.label" aria-label="回転と表示">
         <button id="spin" type="button" aria-pressed="false">回す</button>
         <button id="toggle-south" type="button" aria-pressed="false" data-i18n="toggle.south">南を上に</button>
+        <button id="toggle-countries" class="country-option" type="button" aria-pressed="false" data-i18n="toggle.countries">国 (色分け・国名)</button>
       </div>
       <p id="drag-hint" class="note" data-i18n="drag.hint">地図を左右にドラッグ (スワイプ) しても回せます。</p>
     </section>
@@ -72,7 +81,6 @@
       <div class="row toggles">
         <label><input type="checkbox" id="toggle-graticule" checked /> <span data-i18n="toggle.graticule">経緯線</span></label>
         <label><input type="checkbox" id="toggle-tissot" /> <span data-i18n="toggle.tissot">ティソーの指示楕円</span></label>
-        <label><input type="checkbox" id="toggle-countries" /> <span data-i18n="toggle.countries">国 (色分け・国名)</span></label>
       </div>
 
       <div class="row">

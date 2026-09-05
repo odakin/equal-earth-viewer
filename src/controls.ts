@@ -1,5 +1,5 @@
 import { downloadPng, downloadSvg } from './export';
-import { countryName, formatLat, formatLon, wrapLon } from './geo';
+import { countryName, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
 import { clampZoom, type AppState } from './state';
@@ -103,6 +103,10 @@ export function wireControls(host: ControlsHost): void {
     host.setState({ southUp: !host.getState().southUp }, true);
   });
 
+  must<HTMLButtonElement>('#toggle-countries').addEventListener('click', () => {
+    host.setState({ showCountries: !host.getState().showCountries }, true);
+  });
+
   must<HTMLButtonElement>('#lang-toggle').addEventListener('click', () => {
     host.setState({ lang: host.getState().lang === 'ja' ? 'en' : 'ja' }, true);
   });
@@ -110,7 +114,6 @@ export function wireControls(host: ControlsHost): void {
   const toggles: ReadonlyArray<[string, keyof AppState]> = [
     ['#toggle-graticule', 'showGraticule'],
     ['#toggle-tissot', 'showTissot'],
-    ['#toggle-countries', 'showCountries'],
   ];
   for (const [selector, key] of toggles) {
     const box = must<HTMLInputElement>(selector);
@@ -333,6 +336,10 @@ export function syncControlsUi(state: AppState): void {
       spinBtn.textContent = t(state.lang, 'spin.stop');
     }
   }
+  // 任意の経度では選択なし。丸めた表示値ではなく実際の中心と一致させる。
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset')) {
+    btn.setAttribute('aria-pressed', String(Math.abs(state.lon - Number(btn.dataset['lon'])) < 1e-6));
+  }
   const rounded = Math.round(state.lon);
   const number = must<HTMLInputElement>('#lon-number');
 
@@ -349,21 +356,17 @@ export function syncControlsUi(state: AppState): void {
   }
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
-  must<HTMLInputElement>('#toggle-countries').checked = state.showCountries;
+  must<HTMLButtonElement>('#toggle-countries').setAttribute('aria-pressed', String(state.showCountries));
   must<HTMLButtonElement>('#toggle-south').setAttribute('aria-pressed', state.southUp ? 'true' : 'false');
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
-  must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
   must<SVGSVGElement>('#map').style.touchAction = oblique || state.zoom > 1 ? 'none' : 'pan-y';
   must<HTMLElement>('#zoom-readout').textContent = state.zoom > 1 ? `×${state.zoom.toFixed(1)}` : '';
   const latRounded = Math.round(state.lat);
   const latNumber = must<HTMLInputElement>('#lat-number');
   if (document.activeElement !== latNumber) latNumber.value = String(latRounded);
-  must<HTMLElement>('#lat-readout').textContent = formatLat(state.lat, state.lang);
-  must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon, state.lang);
-  must<HTMLElement>('#seam-readout').textContent = formatLon(state.lon + 180, state.lang);
   must<HTMLElement>('#proj-note').textContent = describeProjection(
     findProjection(state.projectionId),
     state.lang,
