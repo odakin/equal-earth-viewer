@@ -22,6 +22,11 @@
   box-sizing: border-box;
 }
 
+/* display を指定した要素でも hidden 属性が勝つように (UA の display:none は author の display に負ける) */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   padding: 1rem 0 3rem;
