@@ -14,15 +14,12 @@ import { dirname, join } from 'node:path';
 
 import { geoArea, geoAzimuthalEqualArea, geoCircle, geoEqualEarth, geoPath } from 'd3-geo';
 import {
-  geoBoggs,
   geoBonne,
   geoCylindricalEqualArea,
   geoEckert4,
-  geoEckert6,
   geoHammer,
   geoMollweide,
   geoSinusoidal,
-  geoWagner4,
   geoWagner7,
 } from 'd3-geo-projection';
 import { feature } from 'topojson-client';
@@ -42,9 +39,6 @@ const PROJECTIONS = [
   ['mollweide', () => geoMollweide(), false],
   ['sinusoidal', () => geoSinusoidal(), false],
   ['eckert4', () => geoEckert4(), true],
-  ['eckert6', () => geoEckert6(), true],
-  ['wagner4', () => geoWagner4(), true],
-  ['boggs', () => geoBoggs(), false],
   ['lambert-cea', () => geoCylindricalEqualArea().parallel(0), true],
   ['behrmann', () => geoCylindricalEqualArea().parallel(30), true],
   ['gall-peters', () => geoCylindricalEqualArea().parallel(45), true],

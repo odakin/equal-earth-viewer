@@ -57,7 +57,7 @@ src/
 |---|---|
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
 | `lat` | 中心緯度 (-90〜90)。方位図法 (`oblique`) のときだけ効く。既定 0 |
-| `proj` | `projections.ts` の id (14 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / eckert6 / wagner4 / boggs / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
+| `proj` | `projections.ts` の id (11 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 

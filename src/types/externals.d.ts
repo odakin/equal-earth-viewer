@@ -6,12 +6,9 @@ declare module 'd3-geo-projection' {
 
   export function geoMollweide(): GeoProjection;
   export function geoEckert4(): GeoProjection;
-  export function geoEckert6(): GeoProjection;
   export function geoSinusoidal(): GeoProjection;
   export function geoHammer(): GeoProjection;
-  export function geoWagner4(): GeoProjection;
   export function geoWagner7(): GeoProjection;
-  export function geoBoggs(): GeoProjection;
   export function geoBonne(): GeoProjection;
 
   /** 標準緯線を持つ円筒正積図法 (parallel 45° で Gall-Peters になる)。 */

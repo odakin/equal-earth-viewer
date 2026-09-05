@@ -1,15 +1,12 @@
 import { geoAzimuthalEqualArea, geoEqualEarth, type GeoProjection } from 'd3-geo';
 import { t, type Lang } from './i18n';
 import {
-  geoBoggs,
   geoBonne,
   geoCylindricalEqualArea,
   geoEckert4,
-  geoEckert6,
   geoHammer,
   geoMollweide,
   geoSinusoidal,
-  geoWagner4,
   geoWagner7,
 } from 'd3-geo-projection';
 
@@ -81,39 +78,6 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     note: {
       ja: '1906 年。極を赤道の半分の長さの線にして、高緯度の潰れを緩める。経線は楕円弧。',
       en: '1906. Poles are lines half the equator length, easing the high-latitude squash. Meridians are elliptical arcs.',
-    },
-  },
-  {
-    id: 'eckert6',
-    label: { ja: 'エケルト第6', en: 'Eckert VI' },
-    family: 'pseudocylindrical',
-    create: () => geoEckert6(),
-    poleLine: true,
-    note: {
-      ja: '1906 年。第4 と同じ極線だが経線が正弦曲線。エケルトの 6 図法のうち正積は第2・4・6。',
-      en: '1906. Same pole lines as Eckert IV but with sinusoidal meridians. Of Eckert’s six, II, IV and VI are equal-area.',
-    },
-  },
-  {
-    id: 'wagner4',
-    label: { ja: 'ワグナー第4', en: 'Wagner IV' },
-    family: 'pseudocylindrical',
-    create: () => geoWagner4(),
-    poleLine: true,
-    note: {
-      ja: '1932 年。極線は赤道の半分、経線は楕円弧の一部。モルワイデの極を切り開いた形。',
-      en: '1932. Pole lines half the equator, meridians are portions of ellipses. Like a Mollweide with the poles opened up.',
-    },
-  },
-  {
-    id: 'boggs',
-    label: { ja: 'ボッグス', en: 'Boggs eumorphic' },
-    family: 'pseudocylindrical',
-    create: () => geoBoggs(),
-    poleLine: false,
-    note: {
-      ja: '1929 年。サンソンとモルワイデの縦座標を平均して作った図法。',
-      en: '1929. Built by averaging the vertical coordinates of the sinusoidal and Mollweide projections.',
     },
   },
   // ---- 円筒 ----
