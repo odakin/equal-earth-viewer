@@ -220,6 +220,7 @@ export function syncControlsUi(state: AppState): void {
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
+  must<HTMLElement>('#lat-slider').hidden = !oblique;
   must<HTMLElement>('#lat-presets').hidden = !oblique;
   must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');

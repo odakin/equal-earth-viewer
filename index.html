@@ -17,6 +17,18 @@
 
     <div class="wrap map-wrap">
       <svg id="map" role="img" data-i18n-aria="map.aria" aria-label="選択した図法で描いた世界地図"></svg>
+      <!-- 中心緯度は縦スライダーで地図の脇に置く (方位図法のときだけ表示) -->
+      <input
+        id="lat-slider"
+        class="vertical"
+        type="range"
+        min="-90"
+        max="90"
+        step="1"
+        value="0"
+        data-i18n-aria="lat.number.aria" aria-label="中心緯度(度)"
+        hidden
+      />
     </div>
 
     <section class="wrap panel" data-i18n-aria="panel.lon.aria" aria-label="中央経線の操作">
@@ -36,8 +48,7 @@
       </div>
 
       <div id="lat-row" class="row" hidden>
-        <label for="lat-slider" data-i18n="lat.label">中心緯度</label>
-        <input id="lat-slider" class="grow" type="range" min="-90" max="90" step="1" value="0" />
+        <label for="lat-number" data-i18n="lat.label">中心緯度</label>
         <input
           id="lat-number"
           type="number"

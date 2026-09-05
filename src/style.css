@@ -168,6 +168,24 @@ button[aria-pressed='true'] {
 
 .map-wrap {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+#map {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 中心緯度の縦スライダー: 上が北 (max)。writing-mode + direction: rtl で上端 = 最大値 */
+input[type='range'].vertical {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: auto;
+  margin: 0;
 }
 
 #map {
