@@ -3,12 +3,13 @@
  *
  *   node scripts/build-country-names.mjs <ne_110m_admin_0_countries.geojson>
  *
- * 出力: { <key>: { en, ja, c } }
+ * 出力: { <key>: { en, ja, c, x, y } }
  *   key = world-atlas countries-110m の id (ISO 3166-1 numeric)。無い 3 国は "n:<name>"
  *   en / ja = NAME / NAME_JA
  *   c  = MAPCOLOR9 (隣接国が同色にならないよう NE が計算した 1〜9)。
  *        元データで隣接同色の組があれば、後の方の国を「隣国に無い最小番号」へ機械的に振り直す
  *        (= 一般規則。国ごとの手直しはしない = DESIGN.md)。
+ *   x, y = LABEL_X / LABEL_Y (NE が用意している国名ラベルの置き場所、経度・緯度)
  * 取得元: https://github.com/nvkelso/natural-earth-vector (geojson/ne_110m_admin_0_countries.geojson)
  */
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -39,7 +40,7 @@ for (const g of geoms) {
   const q = propOf(g);
   if (!q) throw new Error(`no NE match for ${keyOf(g)}`);
   if (!q.NAME_JA) throw new Error(`no NAME_JA for ${q.NAME}`);
-  out[keyOf(g)] = { en: q.NAME, ja: q.NAME_JA, c: q.MAPCOLOR9 };
+  out[keyOf(g)] = { en: q.NAME, ja: q.NAME_JA, c: q.MAPCOLOR9, x: Number(q.LABEL_X.toFixed(2)), y: Number(q.LABEL_Y.toFixed(2)) };
 }
 
 // 隣接同色の機械的解消 (一般規則)

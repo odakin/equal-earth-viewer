@@ -1,5 +1,5 @@
 import { t, type Lang } from './i18n';
-import { geoGraticule, geoCircle, type GeoSphere } from 'd3-geo';
+import { geoArea, geoCircle, geoGraticule, type GeoSphere } from 'd3-geo';
 import { feature, merge, mesh } from 'topojson-client';
 import type { Feature, Geometry, MultiLineString, MultiPolygon, Polygon } from 'geojson';
 import type { MultiPolygon as TopoMultiPolygon, Polygon as TopoPolygon } from 'topojson-specification';
@@ -20,13 +20,27 @@ function countryKey(id: string | number | undefined, name: string): string {
   return id === undefined ? `n:${name}` : String(id);
 }
 
-export interface CountryFeature extends Feature<Geometry, { key: string }> {}
+export interface CountryProps {
+  key: string;
+  /** 球面上の面積 (ステラジアン)。正積図法なら投影後の面積 = area × scale² なので毎フレーム測り直さない */
+  area: number;
+  /** 国名ラベルの置き場所 [経度, 緯度] (Natural Earth の LABEL_X / LABEL_Y) */
+  label: [number, number];
+}
 
-export const COUNTRIES: CountryFeature[] = feature(countriesTopo, countryGeoms).features.map((f) => ({
-  type: 'Feature',
-  geometry: f.geometry,
-  properties: { key: countryKey(f.id, f.properties.name) },
-}));
+export interface CountryFeature extends Feature<Geometry, CountryProps> {}
+
+const NAMES = countryNames as Record<string, { en: string; ja: string; c: number; x: number; y: number }>;
+
+export const COUNTRIES: CountryFeature[] = feature(countriesTopo, countryGeoms).features.map((f) => {
+  const key = countryKey(f.id, f.properties.name);
+  const n = NAMES[key];
+  return {
+    type: 'Feature',
+    geometry: f.geometry,
+    properties: { key, area: geoArea(f), label: n ? [n.x, n.y] : [0, 0] },
+  };
+});
 
 /** 陸塊 = 全国の結合。 */
 export const LAND: MultiPolygon = merge(
@@ -36,8 +50,6 @@ export const LAND: MultiPolygon = merge(
 
 /** 国境線 = 2 国が接する弧だけ (海岸線は含めない)。 */
 export const BORDERS: MultiLineString = mesh(countriesTopo, countryGeoms, (a, b) => a !== b);
-
-const NAMES = countryNames as Record<string, { en: string; ja: string; c: number }>;
 
 /** 国の地図色番号 1〜9 (Natural Earth MAPCOLOR9 = 隣接国が同色にならない配色)。南極は 0 で別扱い。 */
 export function countryColorIndex(key: string): number {

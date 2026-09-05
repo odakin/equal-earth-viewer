@@ -1,5 +1,5 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
-import { BORDERS, COUNTRIES, GRATICULE, LAND, SPHERE, countryColorIndex, tissotCircles } from './geo';
+import { BORDERS, COUNTRIES, GRATICULE, LAND, SPHERE, countryColorIndex, countryName, tissotCircles } from './geo';
 import { findProjection, type ProjectionDef } from './projections';
 import type { AppState } from './state';
 import type { Theme } from './theme';
@@ -56,6 +56,9 @@ interface MapNodes {
   graticule: SVGPathElement;
   land: SVGPathElement;
   borders: SVGPathElement;
+  /** 国名ラベル (国モード)。国と同じ順で text が並ぶ */
+  labels: SVGGElement;
+  labelsLang: string;
   /** 国ごとの塗り分け (国モード)。画面では hover / tap の当たり判定も兼ねる */
   countries: SVGGElement;
   tissot: SVGGElement;
@@ -81,6 +84,8 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     graticule: el('path', 'graticule'),
     land: el('path', 'land'),
     borders: el('path', 'border'),
+    labels: el('g', 'labels'),
+    labelsLang: '',
     countries: el('g', 'countries'),
     tissot: el('g', 'tissot'),
     outline: el('path', 'outline'),
@@ -90,9 +95,10 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     const p = el('path', `c${countryColorIndex(c.properties.key)}`);
     p.dataset['key'] = c.properties.key;
     nodes.countries.appendChild(p);
+    nodes.labels.appendChild(el('text'));
   }
 
-  // 重ね順: 海 → 経緯線 → 陸 → 国の塗り分け → 国境 → ティソー → 外郭
+  // 重ね順: 海 → 経緯線 → 陸 → 国の塗り分け → 国境 → ティソー → 外郭 → 国名
   // (ティソー・外郭は fill が無いので pointer は下の国 path に届く = hover / tap の当たり判定になる)
   svg.append(
     nodes.style,
@@ -103,6 +109,7 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     nodes.borders,
     nodes.tissot,
     nodes.outline,
+    nodes.labels,
   );
   nodeCache.set(svg, nodes);
   return nodes;
@@ -118,6 +125,7 @@ function svgCss(theme: Theme): string {
     ...theme.countryFills.map((color, i) => `.countries .c${i}{fill:${color}}`),
     `.tissot path{fill:${theme.tissotFill};stroke:${theme.tissotStroke};stroke-width:.7}`,
     `.outline{fill:none;stroke:${theme.outline};stroke-width:1.2}`,
+    `.labels text{fill:${theme.label};stroke:${theme.labelHalo};stroke-width:.22em;stroke-linejoin:round;paint-order:stroke;text-anchor:middle;dominant-baseline:central;font-family:system-ui,-apple-system,'Hiragino Sans','Noto Sans JP',sans-serif;pointer-events:none}`,
   ].join('');
 }
 
@@ -165,6 +173,9 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
     });
   }
 
+  show(nodes.labels, state.showCountries);
+  if (state.showCountries) renderLabels(nodes, state, projection, svg);
+
   show(nodes.tissot, state.showTissot);
   if (state.showTissot) {
     const children = nodes.tissot.children;
@@ -174,6 +185,54 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   }
 
   return height;
+}
+
+/** 国名ラベルの画面上の文字サイズ (px)。拡大しても画面上ではこの大きさのまま */
+const LABEL_PX = 9;
+
+/** 文字列の幅を文字サイズの倍数で見積もる (CJK ≒ 1 文字幅、英数 ≒ 0.55) */
+function textWidthEm(s: string): number {
+  let w = 0;
+  for (const ch of s) w += /[\u3000-\u9fff\uf900-\uffef]/.test(ch) ? 1 : 0.55;
+  return w;
+}
+
+/**
+ * 国名ラベル。全国ぶん置くが、「文字が国の幅に収まる」ものだけ表示する。
+ * 文字は画面上で一定サイズ (SVG 単位では 1/zoom) なので、寄るほど小さい国の名前が現れる。
+ * 国の幅は正積の性質から sqrt(球面面積 × scale²) で見積もる (回転で変わらず、毎フレーム安い)。
+ */
+function renderLabels(nodes: MapNodes, state: AppState, projection: GeoProjection, svg: SVGSVGElement): void {
+  const lang = state.lang;
+  const children = nodes.labels.children;
+  if (nodes.labelsLang !== lang) {
+    COUNTRIES.forEach((c, i) => {
+      const t = children.item(i);
+      if (t) t.textContent = countryName(c.properties.key, lang);
+    });
+    nodes.labelsLang = lang;
+  }
+  // 画面 1 px あたりの SVG 単位 (書き出し時は rect が無いので 1/zoom)
+  const rectWidth = svg.isConnected ? svg.getBoundingClientRect().width : 0;
+  const svgPerPx = rectWidth > 0 ? MAP_WIDTH / state.zoom / rectWidth : 1 / state.zoom;
+  const fontSvg = LABEL_PX * svgPerPx;
+  const k = projection.scale();
+  COUNTRIES.forEach((c, i) => {
+    const t = children.item(i) as SVGTextElement | null;
+    if (!t) return;
+    const name = t.textContent ?? '';
+    const width = textWidthEm(name) * fontSvg;
+    const diameter = Math.sqrt(c.properties.area) * k;
+    const p = width <= diameter * 0.95 ? projection(c.properties.label) : null;
+    if (p === null) {
+      t.style.display = 'none';
+      return;
+    }
+    t.style.display = '';
+    t.setAttribute('x', p[0].toFixed(1));
+    t.setAttribute('y', p[1].toFixed(1));
+    t.setAttribute('font-size', fontSvg.toFixed(2));
+  });
 }
 
 /**
