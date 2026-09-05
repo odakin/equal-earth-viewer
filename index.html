@@ -14,21 +14,21 @@
       <h1>Equal Earth 図法ビューア</h1>
       <p class="lead">
         世界地図は必ずどこかで切れています。中央経線を動かして、
-        <strong>裂け目がどこに来るか</strong>を確かめてください。
+        <strong>裂け目がどこに来るか</strong>を確かめてください。地図を左右にドラッグ (スワイプ) しても回せます。
       </p>
     </header>
 
     <section class="wrap panel" aria-label="中央経線の操作">
       <div class="row">
         <label for="lon-slider">中央経線</label>
-        <input id="lon-slider" class="grow" type="range" min="-180" max="180" step="1" value="0" />
+        <input id="lon-slider" class="grow" type="range" min="-180" max="180" step="1" value="-90" />
         <input
           id="lon-number"
           type="number"
           min="-180"
           max="180"
           step="1"
-          value="0"
+          value="-90"
           aria-label="中央経線(度)"
         />
         <span class="unit">°</span>
@@ -41,6 +41,7 @@
       </div>
 
       <div class="row">
+        <button class="preset" type="button" data-lon="-90">アメリカ中心 90°W</button>
         <button class="preset" type="button" data-lon="0">大西洋中心 0°</button>
         <button class="preset" type="button" data-lon="150">太平洋中心 150°E</button>
         <button class="preset" type="button" data-lon="10">ヨーロッパ中心 10°E</button>

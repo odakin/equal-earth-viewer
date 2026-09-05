@@ -78,6 +78,8 @@ export function wireControls(host: ControlsHost): void {
 
   spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
 
+  wireMapDrag(host, stopSpin);
+
   projSelect.addEventListener('change', () => {
     host.setState({ projectionId: projSelect.value }, true);
   });
@@ -98,6 +100,48 @@ export function wireControls(host: ControlsHost): void {
   must<HTMLButtonElement>('#export-png').addEventListener('click', () => {
     void downloadPng(host.getState());
   });
+}
+
+/**
+ * 地図を左右にドラッグ / スワイプして中央経線を動かす。
+ * 地図の表示幅 = 経度 360° と見なし、動かした距離をそのまま経度に換算する
+ * (指の下の経線がほぼ指に付いてくる)。縦方向は CSS の touch-action: pan-y で
+ * ブラウザのスクロールに譲るので、ここでは水平成分だけを見る。
+ */
+function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
+  const map = must<SVGSVGElement>('#map');
+  let dragging = false;
+  let startX = 0;
+  let startLon = 0;
+
+  map.addEventListener('pointerdown', (ev) => {
+    if (ev.button !== 0) return;
+    dragging = true;
+    startX = ev.clientX;
+    startLon = host.getState().lon;
+    stopSpin();
+    map.setPointerCapture(ev.pointerId);
+    map.classList.add('dragging');
+  });
+
+  map.addEventListener('pointermove', (ev) => {
+    if (!dragging) return;
+    const width = map.getBoundingClientRect().width;
+    if (width === 0) return;
+    const dx = ev.clientX - startX;
+    // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる
+    host.setState({ lon: wrapLon(startLon - (dx / width) * 360) }, false);
+  });
+
+  const finish = (): void => {
+    if (!dragging) return;
+    dragging = false;
+    map.classList.remove('dragging');
+    host.setState({ lon: Math.round(host.getState().lon) }, true);
+  };
+  map.addEventListener('pointerup', finish);
+  map.addEventListener('pointercancel', finish);
+  map.addEventListener('lostpointercapture', finish);
 }
 
 /** state の値を各コントロールの表示に反映する (描画のたびに呼ぶ)。 */

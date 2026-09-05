@@ -6,7 +6,7 @@
  * 検証するのは主に 2 つ:
  *   A. map.ts の最適化の前提 — 中央経線を変えても球の外郭 bounds は動かない。
  *      これが崩れると拡大率と高さのキャッシュが不正になる。
- *   B. 受け入れ条件 — 150°E でグリーンランドが左右の縁に分断される / -90 でアメリカ中心。
+ *   B. 受け入れ条件 — 150°E でグリーンランドが左右の縁に分断される / -90 でアメリカ中心 (= 既定値)。
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -92,7 +92,7 @@ for (const [id, create] of PROJECTIONS) {
   check(inside, `${id}: 陸地が外郭内に収まる`, `land x[${lx0.toFixed(0)},${lx1.toFixed(0)}]`);
 }
 
-console.log('\nC. 受け入れ条件: ?lon=-90 でアメリカ中心');
+console.log('\nC. 受け入れ条件: lon=-90 (既定値) でアメリカ中心');
 {
   const { projection } = fitted(() => geoEqualEarth());
   projection.rotate([90, 0, 0]); // rotate([-lon,0,0]), lon=-90

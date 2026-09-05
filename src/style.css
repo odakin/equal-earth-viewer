@@ -148,6 +148,15 @@ button[aria-pressed='true'] {
   display: block;
   width: 100%;
   height: auto;
+  /* 横ドラッグで中央経線を動かす。縦はページスクロールに譲る */
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#map.dragging {
+  cursor: grabbing;
 }
 
 footer {

@@ -10,7 +10,8 @@ export interface AppState {
 }
 
 export const DEFAULT_STATE: Readonly<AppState> = {
-  lon: 0,
+  // 既定はアメリカ中心 90°W (Patterson の Equal Earth 壁地図 3 版のうち Americas 版の中央経線)
+  lon: -90,
   projectionId: 'equal-earth',
   showGraticule: true,
   showLand: true,
@@ -27,7 +28,10 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
   const q = new URLSearchParams(search);
   const state: AppState = { ...DEFAULT_STATE };
 
-  const lon = Number(q.get('lon'));
+  // q.get が null のとき Number(null) は 0 になるので、キー不在は先に弾く
+  // (既定値が 0 だった間は同じ結果になり気づかなかった潜在バグ)
+  const lonRaw = q.get('lon');
+  const lon = lonRaw === null ? Number.NaN : Number(lonRaw);
   if (Number.isFinite(lon)) state.lon = Math.max(-180, Math.min(180, lon));
 
   const proj = q.get('proj');

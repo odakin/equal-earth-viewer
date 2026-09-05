@@ -50,11 +50,11 @@ src/
 
 ## URL 状態
 
-`?lon=150&proj=robinson&tissot=1` の形で復元できる。既定値と同じ項目は URL に書かないので短く保たれる。
+`?lon=150&proj=robinson&tissot=1` の形で復元できる。地図の横ドラッグ / スワイプでも `lon` が動く (`controls.ts` の `wireMapDrag`)。既定値と同じ項目は URL に書かないので短く保たれる。
 
 | キー | 意味 |
 |---|---|
-| `lon` | 中央経線 (-180〜180) |
+| `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
 | `proj` | `equal-earth` / `robinson` / `mollweide` / `eckert4` / `gall-peters` |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
 
