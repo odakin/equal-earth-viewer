@@ -121,7 +121,8 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
 
   // 中央経線の指定は rotate の第 1 引数のみ。反子午線クリップは d3-geo に任せる。
   // 方位図法だけ第 2 引数 (中心緯度) も使う。他は 0 固定 = fit キャッシュ前提の範囲内。
-  projection.rotate([-state.lon, def.oblique ? -state.lat : 0, 0]);
+  // 第 3 引数 180° = 地図全体を 180° 回す (南が上、東が左)。外郭は点対称なので fit キャッシュはそのまま (項目 A3)。
+  projection.rotate([-state.lon, def.oblique ? -state.lat : 0, state.southUp ? 180 : 0]);
   pathGen.projection(projection);
 
   const nodes = ensureNodes(svg);

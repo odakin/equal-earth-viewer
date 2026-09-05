@@ -42,6 +42,7 @@ const JA: Dict = {
   'toggle.land': '陸地',
   'toggle.graticule': '経緯線',
   'toggle.tissot': 'ティソーの指示楕円',
+  'toggle.south': '南を上に',
   'export.svg': 'SVG を保存',
   'export.png': 'PNG を保存 (2x)',
   'footer.tissot':
@@ -88,6 +89,7 @@ const EN: Dict = {
   'toggle.land': 'Land',
   'toggle.graticule': 'Graticule',
   'toggle.tissot': "Tissot's indicatrix",
+  'toggle.south': 'South up',
   'export.svg': 'Save SVG',
   'export.png': 'Save PNG (2x)',
   'footer.tissot':

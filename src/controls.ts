@@ -106,6 +106,7 @@ export function wireControls(host: ControlsHost): void {
     ['#toggle-graticule', 'showGraticule'],
     ['#toggle-land', 'showLand'],
     ['#toggle-tissot', 'showTissot'],
+    ['#toggle-south', 'southUp'],
   ];
   for (const [selector, key] of toggles) {
     const box = must<HTMLInputElement>(selector);
@@ -155,13 +156,15 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
     if (!dragging) return;
     const width = map.getBoundingClientRect().width;
     if (width === 0) return;
-    const dx = ev.clientX - startX;
+    // 南が上のときは地図が 180° 回っているので、指の動きと経緯の対応が両軸とも逆になる
+    const sign = host.getState().southUp ? -1 : 1;
+    const dx = (ev.clientX - startX) * sign;
     // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる
     const patch: Partial<AppState> = { lon: wrapLon(startLon - (dx / width) * 360) };
     if (findProjection(host.getState().projectionId).oblique) {
       // 下へ動かす = 指の下の点が下がる = 中心は北へ (緯度が増える)。表示高さ = 180° と見なす
       const height = map.getBoundingClientRect().height;
-      const dy = ev.clientY - startY;
+      const dy = (ev.clientY - startY) * sign;
       patch.lat = Math.max(-90, Math.min(90, startLat + (dy / height) * 180));
     }
     host.setState(patch, false);
@@ -208,6 +211,7 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
+  must<HTMLInputElement>('#toggle-south').checked = state.southUp;
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;

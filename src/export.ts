@@ -12,7 +12,7 @@ function baseName(state: AppState): string {
   const def = findProjection(state.projectionId);
   const lat = Math.round(state.lat);
   const latLabel = def.oblique && lat !== 0 ? `_lat${Math.abs(lat)}${lat > 0 ? 'N' : 'S'}` : '';
-  return `${def.id}_lon${label}${latLabel}`;
+  return `${def.id}_lon${label}${latLabel}${state.southUp ? '_southup' : ''}`;
 }
 
 function triggerDownload(blob: Blob, filename: string): void {

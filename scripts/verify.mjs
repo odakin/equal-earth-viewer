@@ -93,6 +93,29 @@ console.log('\nA2. 方位図法は中心緯度を変えても外郭 bounds が�
   check(drift < 0.5, `lambert-azimuthal: 緯度 × 経度 回転での bounds drift ${drift.toFixed(4)} px`);
 }
 
+console.log('\nA3. 南を上に (第 3 引数 180°) しても外郭 bounds が動かない');
+for (const [id, create] of PROJECTIONS) {
+  const { projection, path } = fitted(create);
+  const base = path.bounds(SPHERE).flat();
+  let drift = 0;
+  for (let lon = -180; lon <= 180; lon += 45) {
+    projection.rotate([-lon, 0, 180]);
+    const b = path.bounds(SPHERE).flat();
+    for (let i = 0; i < 4; i += 1) drift = Math.max(drift, Math.abs(b[i] - base[i]));
+  }
+  check(drift < 0.5, `${id}: 180° 回転での bounds drift ${drift.toFixed(4)} px`);
+}
+{
+  // 鏡像でなく回転であること: 東京 (139.7E) は北が上で右半分、南が上なら左半分・下半分に来る
+  const { projection } = fitted(() => geoEqualEarth());
+  projection.rotate([0, 0, 0]);
+  const n = projection([139.7, 35.7]);
+  projection.rotate([0, 0, 180]);
+  const s = projection([139.7, 35.7]);
+  check(n[0] > WIDTH / 2 && s[0] < WIDTH / 2, `東京の x: 北上 ${n[0].toFixed(0)} → 南上 ${s[0].toFixed(0)} (左右も入れ替わる = 回転)`);
+  check(n[1] < s[1], `東京の y: 北上 ${n[1].toFixed(0)} → 南上 ${s[1].toFixed(0)} (上下が入れ替わる)`);
+}
+
 console.log('\nB. 受け入れ条件: 中央経線 150°E でグリーンランドが左右の縁に分断される');
 {
   const { projection } = fitted(() => geoEqualEarth());
