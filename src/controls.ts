@@ -108,7 +108,6 @@ export function wireControls(host: ControlsHost): void {
 
   const toggles: ReadonlyArray<[string, keyof AppState]> = [
     ['#toggle-graticule', 'showGraticule'],
-    ['#toggle-land', 'showLand'],
     ['#toggle-tissot', 'showTissot'],
   ];
   for (const [selector, key] of toggles) {
@@ -212,7 +211,6 @@ export function syncControlsUi(state: AppState): void {
     head.textContent = t(state.lang, `family.${head.dataset['family'] ?? ''}`);
   }
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
-  must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
   must<HTMLButtonElement>('#toggle-south').setAttribute('aria-pressed', state.southUp ? 'true' : 'false');
 

@@ -137,8 +137,7 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   show(nodes.graticule, state.showGraticule);
   if (state.showGraticule) nodes.graticule.setAttribute('d', pathGen(GRATICULE) ?? '');
 
-  show(nodes.land, state.showLand);
-  if (state.showLand) nodes.land.setAttribute('d', pathGen(LAND) ?? '');
+  nodes.land.setAttribute('d', pathGen(LAND) ?? '');
 
   show(nodes.tissot, state.showTissot);
   if (state.showTissot) {

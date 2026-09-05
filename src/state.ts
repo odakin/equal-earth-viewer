@@ -8,7 +8,6 @@ export interface AppState {
   lat: number;
   projectionId: string;
   showGraticule: boolean;
-  showLand: boolean;
   showTissot: boolean;
   /** 南を上にする (地図全体を 180° 回転。鏡像ではない) */
   southUp: boolean;
@@ -22,7 +21,6 @@ export const DEFAULT_STATE: Readonly<AppState> = {
   lat: 0,
   projectionId: 'equal-earth',
   showGraticule: true,
-  showLand: true,
   showTissot: false,
   southUp: false,
   lang: detectLang(),
@@ -52,7 +50,6 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
   if (proj !== null && PROJECTIONS.some((p) => p.id === proj)) state.projectionId = proj;
 
   state.showGraticule = parseBool(q.get('grat'), DEFAULT_STATE.showGraticule);
-  state.showLand = parseBool(q.get('land'), DEFAULT_STATE.showLand);
   state.showTissot = parseBool(q.get('tissot'), DEFAULT_STATE.showTissot);
   state.southUp = parseBool(q.get('south'), DEFAULT_STATE.southUp);
 
@@ -72,7 +69,6 @@ export function stateToQuery(state: AppState): string {
   if (lat !== DEFAULT_STATE.lat && findProjection(state.projectionId).oblique) q.set('lat', String(lat));
   if (state.projectionId !== DEFAULT_STATE.projectionId) q.set('proj', state.projectionId);
   if (state.showGraticule !== DEFAULT_STATE.showGraticule) q.set('grat', state.showGraticule ? '1' : '0');
-  if (state.showLand !== DEFAULT_STATE.showLand) q.set('land', state.showLand ? '1' : '0');
   if (state.showTissot !== DEFAULT_STATE.showTissot) q.set('tissot', state.showTissot ? '1' : '0');
   if (state.southUp !== DEFAULT_STATE.southUp) q.set('south', state.southUp ? '1' : '0');
   // 自動判定と同じ言語なら書かない (共有先の閲覧者は自分の言語で開ける)
