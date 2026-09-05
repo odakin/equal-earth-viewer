@@ -77,11 +77,6 @@ h1 {
   font-weight: 600;
 }
 
-.grow {
-  flex: 1 1 180px;
-  min-width: 140px;
-}
-
 .unit {
   color: var(--muted);
 }
@@ -134,10 +129,6 @@ input[type='number'] {
   text-align: right;
 }
 
-input[type='range'] {
-  accent-color: #4a7fa5;
-}
-
 button:hover,
 select:hover {
   border-color: var(--muted);
@@ -168,24 +159,17 @@ button[aria-pressed='true'] {
 
 .map-wrap {
   margin-bottom: 1rem;
-  display: flex;
-  align-items: stretch;
-  gap: 0.6rem;
 }
 
-#map {
-  flex: 1 1 auto;
-  min-width: 0;
+.inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.75rem;
 }
 
-/* 中心緯度の縦スライダー: 上が北 (max)。writing-mode + direction: rtl で上端 = 最大値 */
-input[type='range'].vertical {
-  writing-mode: vertical-lr;
-  direction: rtl;
-  flex: 0 0 auto;
-  width: 1.4rem;
-  height: auto;
-  margin: 0;
+.inline-field > label {
+  font-weight: 600;
 }
 
 #map {
@@ -224,17 +208,6 @@ footer p {
 
   .row {
     gap: 0.4rem;
-  }
-
-  /* スライダーを 1 行占有させる。ラベルはその上に残す (order 指定なしだと
-     .grow が先頭に回り込み「中央経線」ラベルがスライダーの下にずれる)。 */
-  .row > label {
-    order: -2;
-  }
-
-  .grow {
-    flex: 1 1 100%;
-    order: -1;
   }
 
   button {

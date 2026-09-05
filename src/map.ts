@@ -26,7 +26,7 @@ const fittedCache = new Map<string, Fitted>();
  * 図法ごとに拡大率と原点を 1 度だけ確定する。
  *
  * 擬円筒・円筒図法では中央経線を変えても投影された球の外郭は合同なので、
- * fit を毎フレーム走らせる必要がない。これによりスライダー操作中の仕事は
+ * fit を毎フレーム走らせる必要がない。これによりドラッグ操作中の仕事は
  * 「rotate を変えて d を引き直す」だけになる。
  */
 function getFitted(def: ProjectionDef): Fitted {

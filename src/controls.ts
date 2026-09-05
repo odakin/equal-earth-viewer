@@ -20,10 +20,8 @@ export interface ControlsHost {
 }
 
 export function wireControls(host: ControlsHost): void {
-  const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
   const spinBtn = must<HTMLButtonElement>('#spin');
-  const latSlider = must<HTMLInputElement>('#lat-slider');
   const latNumber = must<HTMLInputElement>('#lat-number');
   // 図法はプルダウンでなく押しボタンの並び (族ごとに 1 行)。文言は syncControlsUi が言語に合わせて流し込む。
   const projList = must<HTMLElement>('#proj-list');
@@ -84,7 +82,6 @@ export function wireControls(host: ControlsHost): void {
     host.setState({ lon: Math.max(-180, Math.min(180, value)) }, true);
   }
 
-  slider.addEventListener('input', () => setLonByUser(Number(slider.value)));
   number.addEventListener('input', () => setLonByUser(Number(number.value)));
 
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset')) {
@@ -95,7 +92,6 @@ export function wireControls(host: ControlsHost): void {
     if (!Number.isFinite(value)) return;
     host.setState({ lat: Math.max(-90, Math.min(90, value)) }, true);
   }
-  latSlider.addEventListener('input', () => setLatByUser(Number(latSlider.value)));
   latNumber.addEventListener('input', () => setLatByUser(Number(latNumber.value)));
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset-lat')) {
     btn.addEventListener('click', () => setLatByUser(Number(btn.dataset['lat'])));
@@ -199,11 +195,9 @@ export function syncControlsUi(state: AppState): void {
     }
   }
   const rounded = Math.round(state.lon);
-  const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
 
   // 入力中の要素は上書きしない (カーソルが飛ぶため)
-  if (document.activeElement !== slider) slider.value = String(rounded);
   if (document.activeElement !== number) number.value = String(rounded);
 
   for (const btn of document.querySelectorAll<HTMLButtonElement>('#proj-list .proj')) {
@@ -220,15 +214,12 @@ export function syncControlsUi(state: AppState): void {
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
-  must<HTMLElement>('#lat-slider').hidden = !oblique;
   must<HTMLElement>('#lat-presets').hidden = !oblique;
   must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
   must<SVGSVGElement>('#map').style.touchAction = oblique ? 'none' : 'pan-y';
   const latRounded = Math.round(state.lat);
-  const latSlider = must<HTMLInputElement>('#lat-slider');
   const latNumber = must<HTMLInputElement>('#lat-number');
-  if (document.activeElement !== latSlider) latSlider.value = String(latRounded);
   if (document.activeElement !== latNumber) latNumber.value = String(latRounded);
   must<HTMLElement>('#lat-readout').textContent = formatLat(state.lat, state.lang);
   must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon, state.lang);
