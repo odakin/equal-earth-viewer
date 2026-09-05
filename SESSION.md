@@ -11,6 +11,7 @@
   `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
 - **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
+- **拡大** (viewBox 切り出し 1〜3 倍、ホイール / ピンチ、縦ドラッグでパン、ダブルクリックで戻す。URL `z` `py`。110m のまま)
 - **国トグル** (MAPCOLOR9 で 9 色塗り分け 〔個別手直しなし、生成 = scripts/build-country-names.mjs〕 + 国境線 + hover / tap で国名、日英。データ = Natural Earth 110m → `src/data/country-names.json`、陸塊は countries の merge に切替、verify G)
 - **陸地トグル削除** (格子だけの図は趣旨外)
 - **「南を上に」ボタン** (180° 回転、鏡像でない。「回す」の隣、押下状態表示。ドラッグ向きも反転、URL `south=1`、verify A3)

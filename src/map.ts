@@ -142,7 +142,7 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   pathGen.projection(projection);
 
   const nodes = ensureNodes(svg);
-  svg.setAttribute('viewBox', `0 0 ${MAP_WIDTH} ${height}`);
+  svg.setAttribute('viewBox', viewBoxFor(state, height).join(' '));
   nodes.style.textContent = svgCss(theme);
 
   // 海の塗りと外郭線は同じ形。毎フレーム通る経路なので投影計算は 1 回で済ませる。
@@ -174,6 +174,19 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   }
 
   return height;
+}
+
+/**
+ * 拡大率と縦ずらしから viewBox を決める。横は常に中央 (経度は回転で見る)、縦は panY で
+ * ずらすが外郭の外には出ない。zoom=1 なら全体 = `0 0 W H`。
+ */
+export function viewBoxFor(state: AppState, height: number): [number, number, number, number] {
+  const z = Math.max(1, state.zoom);
+  const vw = MAP_WIDTH / z;
+  const vh = height / z;
+  const x = (MAP_WIDTH - vw) / 2;
+  const y = Math.max(0, Math.min(height - vh, (height - vh) / 2 + state.panY));
+  return [x, y, vw, vh];
 }
 
 /** 書き出し用に、単体で成立する SVG 要素を新規に組み立てる。 */

@@ -95,6 +95,11 @@ h1 {
   color: var(--fg);
 }
 
+.zoom {
+  margin-left: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .sep {
   color: var(--border);
 }

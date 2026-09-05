@@ -2,7 +2,7 @@ import { downloadPng, downloadSvg } from './export';
 import { countryName, formatLat, formatLon, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
-import type { AppState } from './state';
+import { clampZoom, type AppState } from './state';
 
 /** 「回す」の角速度 (度/秒)。 */
 const SPIN_DEG_PER_SEC = 30;
@@ -140,15 +140,36 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
   let moved = false;
   let startLon = 0;
   let startLat = 0;
+  let startPanY = 0;
+  /** ピンチ用: 押されている pointer の位置 */
+  const pointers = new Map<number, { x: number; y: number }>();
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1;
 
   map.addEventListener('pointerdown', (ev) => {
     if (ev.button !== 0) return;
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pointers.size === 2) {
+      // 2 本目 = ピンチ開始。回転ドラッグは打ち切る
+      dragging = false;
+      map.classList.remove('dragging');
+      const [a, b] = [...pointers.values()];
+      pinchStartDist = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      pinchStartZoom = host.getState().zoom;
+      try {
+        map.setPointerCapture(ev.pointerId);
+      } catch {
+        // 合成イベント等
+      }
+      return;
+    }
     dragging = true;
     moved = false;
     startX = ev.clientX;
     startY = ev.clientY;
     startLon = host.getState().lon;
     startLat = host.getState().lat;
+    startPanY = host.getState().panY;
     stopSpin();
     try {
       map.setPointerCapture(ev.pointerId);
@@ -159,26 +180,44 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
   });
 
   map.addEventListener('pointermove', (ev) => {
+    if (pointers.has(ev.pointerId)) pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pointers.size >= 2 && pinchStartDist > 0) {
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      host.setState({ zoom: clampZoom((pinchStartZoom * d) / pinchStartDist) }, false);
+      return;
+    }
     if (!dragging) return;
     const width = map.getBoundingClientRect().width;
     if (width === 0) return;
     // 南が上のときは地図が 180° 回っているので、指の動きと経緯の対応が両軸とも逆になる
     if (Math.hypot(ev.clientX - startX, ev.clientY - startY) > 4) moved = true;
     if (!moved) return;
-    const sign = host.getState().southUp ? -1 : 1;
+    const state = host.getState();
+    const sign = state.southUp ? -1 : 1;
     const dx = (ev.clientX - startX) * sign;
-    // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる
-    const patch: Partial<AppState> = { lon: wrapLon(startLon - (dx / width) * 360) };
-    if (findProjection(host.getState().projectionId).oblique) {
+    // 右へ動かす = 地図が右へ流れる = 中央経線は西へ (小さく) なる。拡大中は見えている幅 = 360°/zoom
+    const patch: Partial<AppState> = { lon: wrapLon(startLon - (dx / width) * (360 / state.zoom)) };
+    const rect = map.getBoundingClientRect();
+    if (findProjection(state.projectionId).oblique) {
       // 下へ動かす = 指の下の点が下がる = 中心は北へ (緯度が増える)。表示高さ = 180° と見なす
-      const height = map.getBoundingClientRect().height;
       const dy = (ev.clientY - startY) * sign;
-      patch.lat = Math.max(-90, Math.min(90, startLat + (dy / height) * 180));
+      patch.lat = Math.max(-90, Math.min(90, startLat + (dy / rect.height) * (180 / state.zoom)));
+    } else if (state.zoom > 1) {
+      // 拡大中の縦ドラッグ = 縦にずらす (SVG 座標へ換算。南が上でも画面の上下はそのまま)
+      const svgPerPx = rect.height > 0 ? map.viewBox.baseVal.height / rect.height : 0;
+      patch.panY = startPanY - (ev.clientY - startY) * svgPerPx;
     }
     host.setState(patch, false);
   });
 
   const finish = (ev?: PointerEvent): void => {
+    if (ev !== undefined) pointers.delete(ev.pointerId);
+    if (pointers.size < 2 && pinchStartDist > 0) {
+      // ピンチ終了: 拡大率を確定
+      pinchStartDist = 0;
+      host.setState({ zoom: Number(host.getState().zoom.toFixed(2)) }, true);
+    }
     if (!dragging) return;
     dragging = false;
     map.classList.remove('dragging');
@@ -188,11 +227,44 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
       return;
     }
     const s = host.getState();
-    host.setState({ lon: Math.round(s.lon), lat: Math.round(s.lat) }, true);
+    host.setState({ lon: Math.round(s.lon), lat: Math.round(s.lat), panY: Math.round(s.panY) }, true);
   };
   map.addEventListener('pointerup', finish);
   map.addEventListener('pointercancel', finish);
   map.addEventListener('lostpointercapture', finish);
+
+  // ホイール / トラックパッドのピンチ (= ctrl+wheel) で拡大。カーソル位置の縦座標を固定する
+  map.addEventListener(
+    'wheel',
+    (ev) => {
+      ev.preventDefault();
+      const state = host.getState();
+      const rect = map.getBoundingClientRect();
+      const vb = map.viewBox.baseVal;
+      const factor = Math.exp(-ev.deltaY * (ev.ctrlKey ? 0.01 : 0.002));
+      const zoom = clampZoom(state.zoom * factor);
+      if (zoom === state.zoom) return;
+      // カーソル下の SVG y を拡大前後で一致させる
+      const fy = (ev.clientY - rect.top) / rect.height;
+      const ySvg = vb.y + fy * vb.height;
+      const fullHeight = vb.height * state.zoom;
+      const vhNew = fullHeight / zoom;
+      const yNew = ySvg - fy * vhNew;
+      const panY = yNew + vhNew / 2 - fullHeight / 2;
+      // レイアウト前 (rect.height = 0) 等で NaN になったら、ずらしは据え置きで拡大だけ行う
+      host.setState(
+        { zoom: Number(zoom.toFixed(2)), panY: Number.isFinite(panY) ? Math.round(panY) : state.panY },
+        true,
+      );
+    },
+    { passive: false },
+  );
+
+  // ダブルクリック / ダブルタップで拡大を戻す
+  map.addEventListener('dblclick', (ev) => {
+    ev.preventDefault();
+    host.setState({ zoom: 1, panY: 0 }, true);
+  });
 }
 
 /**
@@ -284,7 +356,8 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLElement>('#lat-row').hidden = !oblique;
   must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
-  must<SVGSVGElement>('#map').style.touchAction = oblique ? 'none' : 'pan-y';
+  must<SVGSVGElement>('#map').style.touchAction = oblique || state.zoom > 1 ? 'none' : 'pan-y';
+  must<HTMLElement>('#zoom-readout').textContent = state.zoom > 1 ? `×${state.zoom.toFixed(1)}` : '';
   const latRounded = Math.round(state.lat);
   const latNumber = must<HTMLInputElement>('#lat-number');
   if (document.activeElement !== latNumber) latNumber.value = String(latRounded);

@@ -62,6 +62,7 @@ src/
 | `proj` | `projections.ts` の id (11 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
 | `grat` `tissot` `countries` | 経緯線 / ティソー円 / 国 (塗り分け+国境+国名) の表示 (`1` / `0`)。陸地は常に描く |
 | `south` | `1` で南を上に (地図全体を 180° 回転、鏡像ではない) |
+| `z` `py` | 拡大率 (1〜3、1 なら省略) と縦ずらし (SVG 座標)。viewBox の切り出しで実現 |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 
 ## 触るときの注意
