@@ -2,58 +2,30 @@
 
 ## 現在地 (2026-09-05)
 
-初版を実装し、公開まで完了。同日夕方に 2 機能追加 + 潜在バグ 1 件修正:
+初版から 1 日で現在の形まで到達。公開 = **https://odakin.github.io/equal-earth-viewer/**
+(GitHub Pages、`master` の `docs/` から配信)。
 
-- **既定をアメリカ中心 90°W に変更** (出発点の皮肉「アメリカ中心のも作ってあげたら納得するんじゃない?」
-  を初期表示で見せる。90°W は Patterson の Equal Earth 壁地図 Americas 版の中央経線 = DESIGN.md)
-  + プリセット「アメリカ中心 90°W」を先頭に追加
-- **地図の横ドラッグ / スワイプで中央経線を回す** (Pointer Events、表示幅 = 360° 換算、
-  `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
-- **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
-- **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
-- **海岸線 50m + 110m 2 段** (静止時 50m、ドラッグ中 110m。拡大上限 8 倍、単一 HTML 950 KB。国 key = name)
-- **国名の描き込み** (全国ぶん、文字が国の幅 + 倍率比例のはみ出し許容 〔最大 200 px〕 に収まるものだけ表示 = 8 倍で全 241 単位。画面上 9 px 固定 = 寄ると小国が現れる。置き場所 = NE LABEL_X/Y)
-- **拡大** (viewBox 切り出し 1〜3 倍、ホイール / ピンチ、縦ドラッグでパン、ダブルクリックで戻す。URL `z` `py`。110m のまま)
-- **国トグル** (MAPCOLOR9 で 9 色塗り分け 〔個別手直しなし、生成 = scripts/build-country-names.mjs〕 + 国境線 + hover / tap で国名、日英。データ = Natural Earth 110m → `src/data/country-names.json`、陸塊は countries の merge に切替、verify G)
-- **陸地トグル削除** (格子だけの図は趣旨外)
-- **「南を上に」ボタン** (180° 回転、鏡像でない。「回す」の隣、押下状態表示。ドラッグ向きも反転、URL `south=1`、verify A3)
-- **赤道・中央経線の太線を削除** (経緯線のみ、裂け目教材の名残) + fix: `[hidden]{display:none!important}` (中心緯度欄が非方位図法でも見えていた)
-- **スライダー全廃** (ドラッグと二重、user 指摘。数値入力・プリセット・ドラッグ・回す のみ)
-- **方位図法は中心緯度も可変** (`lat` state / URL、数値 + 縦ドラッグ 〔極プリセットは削除〕、方位のみ表示。verify A2)
-- **図法選択をプルダウンからボタン列へ** (族ごとに 1 行、user 要望)
-- **図法は 11 種** (一度 14 まで増やしたが、エケルト第6・ワグナー第4・ボッグスを「代表的でない」で削除。族別ボタン列。グード断裂は回すと大陸が切れるので一度固定化して入れたが趣旨違いで削除 = DESIGN.md。正積であることを verify.mjs F がティソー円面積比で実測。DESIGN.md)
-- **綿密チェック (user 指摘)**: イコールアースの極は線 (点は誤り) / Gall-Peters の歪み方向 / Europe プリセット 0° / 出典表記 を訂正、表 = DESIGN.md 末尾
-- **日本語 UI の英字排除** (図法名・タイトル・プリセット経度を和文表記、SVG/PNG と出典は例外)
-- **英語 UI** (同一ファイル内 ja/en 切替、`navigator.language` 自動判定 + `?lang=` + ボタン。理由 = DESIGN.md)
-- **修正**: URL に `lon` が無いとき `Number(null) = 0` で既定値を潰していた
-  (既定が 0 の間は見えなかった。既定変更で即露見)
+- 11 の正積図法 (族別ボタン列)、既定はアメリカ中心 西経90° (出発点の皮肉が理由 = DESIGN.md)
+- 操作 = ドラッグ (回転、方位図法は緯度も) / 数値入力 / プリセット 3 / 回す / 南を上に (180° 回転)
+- 表示 = 経緯線 / ティソー円 / 国 (MAPCOLOR9 塗り分け + 国境 + 国名描き込み + hover / tap)
+- 拡大 1〜8 倍 (viewBox 切り出し、動作中 110m・静止時 50m の 2 段)、日英 UI、URL 状態、SVG / PNG 書き出し
+- `npm run build` → `docs/index.html` 約 950 KB (gzip 305 KB)、`npm test` 全項目 pass
+  (A 外郭不変 / A2 方位の緯度回転 / A3 南を上 / B・C 受け入れ / D path 生成 / E 極の実測 / F 正積の実測 / G 国名表)
+- security baseline 適用済 (Dependabot / CodeQL / Semgrep / push protection / branch protection / leak gate marker)
 
-仕様書の必須 (1〜5) と「望ましい」(6〜9) を全て実装済み。
+## 知見の置き場
 
-- 公開 URL: **https://odakin.github.io/equal-earth-viewer/** (GitHub Pages、`master` の `docs/` から配信)
-- `npm run build` は警告なしで通り、`docs/index.html` 単一ファイル (約 96 KB) を出力 (再ビルドで差分なし)
-- `npm test` (`scripts/verify.mjs`) 全項目 pass
-- `npx tsc --noEmit` エラーなし
-- security baseline 適用済 (Dependabot / CodeQL / Semgrep / push protection / branch protection / public-repo leak gate marker)
-  — workflow 2 本は gh token に `workflow` scope が無く API では載らないため git push で追加
+- **一般則 (他 project で再利用)** = 層1 [`claude-config/conventions/web-map-projections.md`](../claude-config/conventions/web-map-projections.md)
+- **この project の判断史 (なぜそうしたか・撤回したもの)** = [`DESIGN.md`](DESIGN.md)
+- **触るときの注意** = [`CLAUDE.md`](CLAUDE.md)
+- 当日の user 指摘による訂正一覧 = odakin-prefs `work-discipline-archive.md §2026-09-05`
 
-## ブラウザ目視確認 (2026-09-05、dev server + 内蔵ブラウザ)
+## 未確認
 
-以下すべて問題なし、調整不要と判断:
-
-- 初期表示 (0°) / プリセット 150°E でグリーンランドが左右に分断 / URL が `?lon=150` に同期
-- ティソー円表示 + Gall-Peters 切替 → URL `?lon=150&proj=gall-peters&tissot=1`
-- スマホ幅 (375px): コントロールが縦積みに折り返し、地図は横幅いっぱい、横スクロールなし
-- ダークモード: UI は暗色、地図の配色は変わらず (theme.ts が正本の設計どおり)
-- 「回す」: 回転開始・停止、停止時に URL 確定。console エラーなし
-- 未確認: SVG / PNG 書き出し (内蔵ブラウザはダウンロードを遮断するため実ブラウザで要確認)
-
-## dev server
-
-Claude Code の `~/Claude/.claude/launch.json` に `equal-earth-viewer` (port 5175) を登録済み。
-手動なら `npm run dev`。
+- 実ブラウザでの SVG / PNG 書き出し (内蔵ブラウザはダウンロードを遮断するため未検証)
+- 実機スマホでの操作感 (ピンチ・スワイプは合成イベントで検証しただけ)
 
 ## 次にやるなら
 
-- 実ブラウザで SVG / PNG 書き出しの目視 (色が焼き込まれているか)
-- 教材として使ってみて出た要望
+- 使ってみて出た要望
+- 地図上でホイールがページスクロールを奪うのが気になれば「Ctrl+ホイールのみ拡大」に変更

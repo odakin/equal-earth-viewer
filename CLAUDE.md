@@ -65,6 +65,11 @@ src/
 | `z` `py` | 拡大率 (1〜8、1 なら省略) と縦ずらし (SVG 座標)。viewBox の切り出しで実現 |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 
+## 知見の正本
+
+- 他 project でも使える一般則 (図法 metadata の実測、断裂図法、viewBox 拡大 + 2 段詳細度、Natural Earth の key / name_ja / MAPCOLOR9、国名 fit 規則、web の罠) = 層1 [`claude-config/conventions/web-map-projections.md`](../claude-config/conventions/web-map-projections.md)
+- この repo の判断史 = [`DESIGN.md`](DESIGN.md)。新しい判断は DESIGN に、一般化できたら層1 へ hoist
+
 ## 触るときの注意
 
 - **中央経線は `projection.rotate([-lon, 0, 0])` だけで表現する。** 反子午線での切断は d3-geo の
