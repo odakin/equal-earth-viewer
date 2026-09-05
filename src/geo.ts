@@ -3,22 +3,12 @@ import { geoArea, geoCircle, geoGraticule, type GeoSphere } from 'd3-geo';
 import { feature, merge, mesh } from 'topojson-client';
 import type { Feature, Geometry, MultiLineString, MultiPolygon, Polygon } from 'geojson';
 import type { MultiPolygon as TopoMultiPolygon, Polygon as TopoPolygon } from 'topojson-specification';
-import countriesTopo from 'world-atlas/countries-110m.json';
+import countries50 from 'world-atlas/countries-50m.json';
+import countries110 from 'world-atlas/countries-110m.json';
 import countryNames from './data/country-names.json';
 
 /** 地図の外郭 (投影された地球全体の輪郭)。 */
 export const SPHERE: GeoSphere = { type: 'Sphere' };
-
-/**
- * 国 (Natural Earth 110m、world-atlas 同梱)。陸塊はこれを merge して作る
- * (land-110m と面積が一致することを確認済、二重に持たない)。TopoJSON → GeoJSON は module 評価時の 1 回。
- */
-const countryGeoms = countriesTopo.objects.countries;
-
-/** 国の識別 key。ISO 3166-1 numeric、無いもの (コソボ等 3 国) は名前で代用。 */
-function countryKey(id: string | number | undefined, name: string): string {
-  return id === undefined ? `n:${name}` : String(id);
-}
 
 export interface CountryProps {
   key: string;
@@ -30,30 +20,54 @@ export interface CountryProps {
 
 export interface CountryFeature extends Feature<Geometry, CountryProps> {}
 
+export interface Dataset {
+  countries: CountryFeature[];
+  /** 陸塊 = 全単位の結合 (陸データを別に持たない) */
+  land: MultiPolygon;
+  /** 国境線 = 2 単位が接する弧だけ (海岸線は含めない) */
+  borders: MultiLineString;
+}
+
 const NAMES = countryNames as Record<string, { en: string; ja: string; c: number; x: number; y: number }>;
 
-export const COUNTRIES: CountryFeature[] = feature(countriesTopo, countryGeoms).features.map((f) => {
-  const key = countryKey(f.id, f.properties.name);
-  const n = NAMES[key];
+/** 国の識別 key = world-atlas の name (= NE の NAME)。110m / 50m とも一意で、名前表もこれで引く。 */
+function countryKey(name: string): string {
+  return name;
+}
+
+type CountriesTopo = typeof countries50;
+
+function buildDataset(topo: CountriesTopo): Dataset {
+  const geoms = topo.objects.countries;
   return {
-    type: 'Feature',
-    geometry: f.geometry,
-    properties: { key, area: geoArea(f), label: n ? [n.x, n.y] : [0, 0] },
+    countries: feature(topo, geoms).features.map((f) => {
+      const key = countryKey(f.properties.name);
+      const n = NAMES[key];
+      return {
+        type: 'Feature',
+        geometry: f.geometry,
+        properties: { key, area: geoArea(f), label: n ? [n.x, n.y] : [0, 0] },
+      };
+    }),
+    land: merge(topo, geoms.geometries as Array<TopoPolygon | TopoMultiPolygon>),
+    borders: mesh(topo, geoms, (a, b) => a !== b),
   };
-});
+}
 
-/** 陸塊 = 全国の結合。 */
-export const LAND: MultiPolygon = merge(
-  countriesTopo,
-  countryGeoms.geometries as Array<TopoPolygon | TopoMultiPolygon>,
-);
+/**
+ * 2 段階の詳細度 (Natural Earth 50m / 110m、world-atlas 同梱)。
+ * 止まっている時と書き出しは 50m (241 単位、寄れる)、ドラッグ / 回転中は 110m (177 単位、軽い)。
+ * 50m だけだと 1 フレーム 170 ms で回せなかった (2026-09-05 実測)。
+ */
+export const HIGH: Dataset = buildDataset(countries50);
+export const LOW: Dataset = buildDataset(countries110 as unknown as CountriesTopo);
 
-/** 国境線 = 2 国が接する弧だけ (海岸線は含めない)。 */
-export const BORDERS: MultiLineString = mesh(countriesTopo, countryGeoms, (a, b) => a !== b);
+/** 国名ラベルと hover は常に 50m の単位で扱う。 */
+export const COUNTRIES: CountryFeature[] = HIGH.countries;
 
 /** 国の地図色番号 1〜9 (Natural Earth MAPCOLOR9 = 隣接国が同色にならない配色)。南極は 0 で別扱い。 */
 export function countryColorIndex(key: string): number {
-  if (key === '010') return 0; // 南極
+  if (key === 'Antarctica') return 0;
   return NAMES[key]?.c ?? 1;
 }
 

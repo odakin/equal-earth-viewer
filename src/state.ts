@@ -36,7 +36,7 @@ export const DEFAULT_STATE: Readonly<AppState> = {
 };
 
 export const ZOOM_MIN = 1;
-export const ZOOM_MAX = 3;
+export const ZOOM_MAX = 8;
 
 export function clampZoom(z: number): number {
   return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));

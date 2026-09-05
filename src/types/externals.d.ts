@@ -20,6 +20,11 @@ declare module 'd3-geo-projection' {
 }
 
 // world-atlas の TopoJSON。中身を tsc に型推論させると無駄に重いので Topology として受ける。
+declare module 'world-atlas/countries-50m.json' {
+  import type { Topology, GeometryCollection } from 'topojson-specification';
+  const topology: Topology<{ countries: GeometryCollection<{ name: string }> }>;
+  export default topology;
+}
 declare module 'world-atlas/countries-110m.json' {
   import type { Topology, GeometryCollection } from 'topojson-specification';
   const topology: Topology<{ countries: GeometryCollection<{ name: string }> }>;

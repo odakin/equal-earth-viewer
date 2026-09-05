@@ -1,5 +1,5 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
-import { BORDERS, COUNTRIES, GRATICULE, LAND, SPHERE, countryColorIndex, countryName, tissotCircles } from './geo';
+import { COUNTRIES, GRATICULE, HIGH, LOW, SPHERE, countryColorIndex, countryName, tissotCircles, type Dataset } from './geo';
 import { findProjection, type ProjectionDef } from './projections';
 import type { AppState } from './state';
 import type { Theme } from './theme';
@@ -59,8 +59,9 @@ interface MapNodes {
   /** 国名ラベル (国モード)。国と同じ順で text が並ぶ */
   labels: SVGGElement;
   labelsLang: string;
-  /** 国ごとの塗り分け (国モード)。画面では hover / tap の当たり判定も兼ねる */
-  countries: SVGGElement;
+  /** 国ごとの塗り分け (国モード)。画面では hover / tap の当たり判定も兼ねる。詳細度ごとに 1 群 */
+  countriesHigh: SVGGElement;
+  countriesLow: SVGGElement;
   tissot: SVGGElement;
   outline: SVGPathElement;
 }
@@ -86,17 +87,23 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     borders: el('path', 'border'),
     labels: el('g', 'labels'),
     labelsLang: '',
-    countries: el('g', 'countries'),
+    countriesHigh: el('g', 'countries'),
+    countriesLow: el('g', 'countries'),
     tissot: el('g', 'tissot'),
     outline: el('path', 'outline'),
   };
   for (let i = 0; i < TISSOT.length; i += 1) nodes.tissot.appendChild(el('path'));
-  for (const c of COUNTRIES) {
-    const p = el('path', `c${countryColorIndex(c.properties.key)}`);
-    p.dataset['key'] = c.properties.key;
-    nodes.countries.appendChild(p);
-    nodes.labels.appendChild(el('text'));
+  for (const [group, data] of [
+    [nodes.countriesHigh, HIGH],
+    [nodes.countriesLow, LOW],
+  ] as const) {
+    for (const c of data.countries) {
+      const p = el('path', `c${countryColorIndex(c.properties.key)}`);
+      p.dataset['key'] = c.properties.key;
+      group.appendChild(p);
+    }
   }
+  for (let i = 0; i < COUNTRIES.length; i += 1) nodes.labels.appendChild(el('text'));
 
   // 重ね順: 海 → 経緯線 → 陸 → 国の塗り分け → 国境 → ティソー → 外郭 → 国名
   // (ティソー・外郭は fill が無いので pointer は下の国 path に届く = hover / tap の当たり判定になる)
@@ -105,7 +112,8 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     nodes.ocean,
     nodes.graticule,
     nodes.land,
-    nodes.countries,
+    nodes.countriesHigh,
+    nodes.countriesLow,
     nodes.borders,
     nodes.tissot,
     nodes.outline,
@@ -139,7 +147,12 @@ function show(node: SVGElement, visible: boolean): void {
  *
  * @returns 描画高さ (SVG 座標)
  */
-export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): number {
+export type Detail = 'high' | 'low';
+
+/**
+ * @param detail 'high' = 50m (静止時・書き出し) / 'low' = 110m (ドラッグ・回転中)。
+ */
+export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme, detail: Detail = 'high'): number {
   const def = findProjection(state.projectionId);
   const { projection, height } = getFitted(def);
 
@@ -161,14 +174,18 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   show(nodes.graticule, state.showGraticule);
   if (state.showGraticule) nodes.graticule.setAttribute('d', pathGen(GRATICULE) ?? '');
 
-  nodes.land.setAttribute('d', pathGen(LAND) ?? '');
+  const data: Dataset = detail === 'high' ? HIGH : LOW;
+  nodes.land.setAttribute('d', pathGen(data.land) ?? '');
 
   show(nodes.borders, state.showCountries);
-  if (state.showCountries) nodes.borders.setAttribute('d', pathGen(BORDERS) ?? '');
-  show(nodes.countries, state.showCountries);
+  if (state.showCountries) nodes.borders.setAttribute('d', pathGen(data.borders) ?? '');
+  const active = detail === 'high' ? nodes.countriesHigh : nodes.countriesLow;
+  const inactive = detail === 'high' ? nodes.countriesLow : nodes.countriesHigh;
+  show(inactive, false);
+  show(active, state.showCountries);
   if (state.showCountries) {
-    const children = nodes.countries.children;
-    COUNTRIES.forEach((c, i) => {
+    const children = active.children;
+    data.countries.forEach((c, i) => {
       children.item(i)?.setAttribute('d', pathGen(c) ?? '');
     });
   }

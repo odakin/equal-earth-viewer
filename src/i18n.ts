@@ -48,7 +48,7 @@ const JA: Dict = {
   'footer.tissot':
     'ティソーの指示楕円は半径約 500 km の円を 30° 間隔に並べたものです。どの図法も正積なので<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。',
   'footer.src':
-    '図法: イコールアース = Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; 2018 年公開) ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)',
+    '図法: イコールアース = Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; 2018 年公開) ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 50m)',
   'lang.switch': 'English',
   'lang.switch.aria': '英語に切り替え',
   'family.pseudocylindrical': '擬円筒',
@@ -95,7 +95,7 @@ const EN: Dict = {
   'footer.tissot':
     "Tissot's indicatrices are circles of about 500 km radius placed every 30°. All projections here are equal-area, so <strong>every circle has the same area</strong>; only the shape distortion shows.",
   'footer.src':
-    'Projection: Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; online 2018) / Rendering: d3-geo / Coastlines: Natural Earth (world-atlas 110m)',
+    'Projection: Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; online 2018) / Rendering: d3-geo / Coastlines: Natural Earth (world-atlas 50m)',
   'lang.switch': '日本語',
   'lang.switch.aria': 'Switch to Japanese',
   'family.pseudocylindrical': 'Pseudocylindrical',

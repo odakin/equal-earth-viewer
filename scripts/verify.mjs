@@ -26,7 +26,7 @@ import { feature, merge } from 'topojson-client';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const countriesTopo = JSON.parse(
-  readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'countries-110m.json'), 'utf8'),
+  readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'countries-50m.json'), 'utf8'),
 );
 // src/geo.ts と同じく、陸塊は国の merge
 const LAND = merge(countriesTopo, countriesTopo.objects.countries.geometries);
@@ -193,17 +193,21 @@ for (const [id, make] of PROJECTIONS) {
   check(spread < 0.01, `${id}: 面積比のばらつき ${(spread * 100).toFixed(3)}%`, '許容 1%');
 }
 
-console.log('\nG. 国名表 (src/data/country-names.json) が world-atlas の全国を日英で覆う');
+console.log('\nG. 国名表 (src/data/country-names.json) が world-atlas 50m の全単位を日英で覆う');
 {
   const geoms = countriesTopo.objects.countries.geometries;
   const missing = geoms
-    .map((g) => (g.id === undefined ? `n:${g.properties.name}` : String(g.id)))
+    .map((g) => g.properties.name)
     .filter((key) => !COUNTRY_NAMES[key] || !COUNTRY_NAMES[key].ja || !COUNTRY_NAMES[key].en);
   check(missing.length === 0, `${geoms.length} か国すべてに ja / en の名前がある`, missing.join(', '));
-  check(COUNTRY_NAMES['392']?.ja === '日本', `id 392 = ${COUNTRY_NAMES['392']?.ja}`);
-  const landTopo = JSON.parse(readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'land-110m.json'), 'utf8'));
+  check(COUNTRY_NAMES['Japan']?.ja === '日本', `Japan = ${COUNTRY_NAMES['Japan']?.ja}`);
+  const low = JSON.parse(readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'countries-110m.json'), 'utf8')).objects.countries.geometries;
+  const lowMissing = low.map((g) => g.properties.name).filter((k) => !COUNTRY_NAMES[k]);
+  check(lowMissing.length === 0, `110m (ドラッグ中用) の ${low.length} 単位も同じ表で引ける`, lowMissing.join(', '));
+  const landTopo = JSON.parse(readFileSync(join(here, '..', 'node_modules', 'world-atlas', 'land-50m.json'), 'utf8'));
   const a = geoArea(LAND), b = geoArea(feature(landTopo, landTopo.objects.land));
-  check(Math.abs(a - b) / b < 1e-3, `国の merge の面積 ${a.toFixed(5)} sr ≒ land-110m ${b.toFixed(5)} sr (陸塊を国から作ってよい)`);
+  check(Math.abs(a - b) / b < 1e-3, `国の merge の面積 ${a.toFixed(5)} sr ≒ land-50m ${b.toFixed(5)} sr (陸塊を国から作ってよい)`);
+  check(geoms.length === 241, `50m の単位数 = ${geoms.length} (241 = 国 + 属領・小島)`);
 }
 
 console.log('\nD. 全図法で陸地・外郭の path が生成できる');
