@@ -36,7 +36,7 @@ scripts/verify.mjs  投影ロジックの回帰テスト
 src/
   main.ts           起動・状態の集約・render の呼び出し
   state.ts          AppState の型と URL 同期
-  projections.ts    図法の定義一覧 (名前・ファクトリ・正積か・極が線か)
+  projections.ts    図法の定義一覧 (名前・ファクトリ・極が線か。すべて正積)
   geo.ts            陸地 / 経緯線 / 赤道 / ティソー円の GeoJSON
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
@@ -50,12 +50,12 @@ src/
 
 ## URL 状態
 
-`?lon=150&proj=robinson&tissot=1` の形で復元できる。地図の横ドラッグ / スワイプでも `lon` が動く (`controls.ts` の `wireMapDrag`)。既定値と同じ項目は URL に書かないので短く保たれる。
+`?lon=150&proj=mollweide&tissot=1` の形で復元できる。地図の横ドラッグ / スワイプでも `lon` が動く (`controls.ts` の `wireMapDrag`)。既定値と同じ項目は URL に書かないので短く保たれる。
 
 | キー | 意味 |
 |---|---|
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
-| `proj` | `equal-earth` / `robinson` / `mollweide` / `eckert4` / `gall-peters` |
+| `proj` | `equal-earth` / `mollweide` / `eckert4` / `gall-peters` (すべて正積) |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
 
 ## 触るときの注意

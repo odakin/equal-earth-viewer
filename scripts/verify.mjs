@@ -14,7 +14,6 @@ import { dirname, join } from 'node:path';
 
 import { geoEqualEarth, geoPath } from 'd3-geo';
 import {
-  geoRobinson,
   geoMollweide,
   geoEckert4,
   geoCylindricalEqualArea,
@@ -32,7 +31,6 @@ const SPHERE = { type: 'Sphere' };
 
 const PROJECTIONS = [
   ['equal-earth', () => geoEqualEarth()],
-  ['robinson', () => geoRobinson()],
   ['mollweide', () => geoMollweide()],
   ['eckert4', () => geoEckert4()],
   ['gall-peters', () => geoCylindricalEqualArea().parallel(45)],
