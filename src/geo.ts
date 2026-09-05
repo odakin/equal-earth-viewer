@@ -39,7 +39,7 @@ export const BORDERS: MultiLineString = mesh(countriesTopo, countryGeoms, (a, b)
 
 const NAMES = countryNames as Record<string, { en: string; ja: string; c: number }>;
 
-/** 国の地図色番号 1〜7 (Natural Earth MAPCOLOR7 = 隣接国が同色にならない配色)。南極は 0 で別扱い。 */
+/** 国の地図色番号 1〜9 (Natural Earth MAPCOLOR9 = 隣接国が同色にならない配色)。南極は 0 で別扱い。 */
 export function countryColorIndex(key: string): number {
   if (key === '010') return 0; // 南極
   return NAMES[key]?.c ?? 1;

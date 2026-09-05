@@ -33,13 +33,14 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 index.html          Vite のエントリ (ルート直下。public/ に置くと Vite が処理しない)
 vite.config.ts      singlefile プラグイン設定
 scripts/verify.mjs  投影ロジックの回帰テスト
+scripts/build-country-names.mjs  国名・配色表の生成 (入力 = Natural Earth 110m admin_0 geojson、リポには含めない)
 src/
   main.ts           起動・状態の集約・render の呼び出し
   state.ts          AppState の型と URL 同期
   i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
   projections.ts    図法の定義一覧 (名前・族・ファクトリ・極が線か。すべて正積 = verify.mjs F が実測)
   geo.ts            国 / 陸地 (= 国の merge) / 国境 / 経緯線 / ティソー円の GeoJSON + 国名 lookup
-  data/country-names.json  国 key → {en, ja, c} (Natural Earth 110m admin_0 の NAME / NAME_JA / MAPCOLOR7 から生成、177 か国)
+  data/country-names.json  国 key → {en, ja, c} (`scripts/build-country-names.mjs` が Natural Earth 110m admin_0 の NAME / NAME_JA / MAPCOLOR9 から生成、177 か国)
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
   export.ts         SVG / PNG 書き出し
