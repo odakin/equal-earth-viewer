@@ -8,7 +8,6 @@ declare module 'd3-geo-projection' {
   export function geoEckert4(): GeoProjection;
   export function geoEckert6(): GeoProjection;
   export function geoSinusoidal(): GeoProjection;
-  export function geoInterruptedHomolosine(): GeoProjection;
   export function geoHammer(): GeoProjection;
   export function geoWagner4(): GeoProjection;
   export function geoWagner7(): GeoProjection;

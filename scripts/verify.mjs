@@ -20,7 +20,6 @@ import {
   geoEckert4,
   geoEckert6,
   geoHammer,
-  geoInterruptedHomolosine,
   geoMollweide,
   geoSinusoidal,
   geoWagner4,
@@ -42,7 +41,6 @@ const PROJECTIONS = [
   ['equal-earth', () => geoEqualEarth(), true],
   ['mollweide', () => geoMollweide(), false],
   ['sinusoidal', () => geoSinusoidal(), false],
-  ['goode', () => geoInterruptedHomolosine(), false],
   ['eckert4', () => geoEckert4(), true],
   ['eckert6', () => geoEckert6(), true],
   ['wagner4', () => geoWagner4(), true],
@@ -138,7 +136,7 @@ console.log('\nC. 受け入れ条件: lon=-90 (既定値) でアメリカ中心'
 console.log('\nE. projections.ts の極の扱い (poleLine) と実測が一致する');
 for (const [id, make, expectLine] of PROJECTIONS) {
   const p = make().rotate([0, 0, 0]).translate([0, 0]).scale(1);
-  // 極のすぐそばと赤道で、経度方向の局所スケールを比べる (断裂図法でも 1 lobe 内に収まる小さい幅で測る)
+  // 極のすぐそばと赤道で、経度方向の局所スケールを比べる
   const d = 0.5;
   const sx = (lat) => p([d, lat])[0] - p([-d, lat])[0];
   const ratio = sx(89.99) / sx(0);
@@ -150,7 +148,7 @@ console.log('\nF. 全図法が正積である (ティソー円の投影面積 / 
 for (const [id, make] of PROJECTIONS) {
   const { path } = fitted(make);
   const circle = geoCircle().radius(4.5).precision(0.5);
-  // 断裂 (グード) と外周 (ボンヌ・方位) を避けた中心を選ぶ
+  // 外周 (ボンヌ・方位) を避けた中心を選ぶ
   const centers = [[0, 0], [0, 60], [60, -30], [150, -45], [-120, 50], [30, 30], [-60, -30]];
   const ratios = centers.map((c) => {
     const g = circle.center(c)();

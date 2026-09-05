@@ -7,7 +7,6 @@ import {
   geoEckert4,
   geoEckert6,
   geoHammer,
-  geoInterruptedHomolosine,
   geoMollweide,
   geoSinusoidal,
   geoWagner4,
@@ -25,11 +24,6 @@ export interface ProjectionDef {
   create: () => GeoProjection;
   /** 極が線として描かれるか (点なら false)。scripts/verify.mjs 項目 E が実測で守る */
   poleLine: boolean;
-  /**
-   * 中央経線を固定する図法 (断裂図法)。断裂の位置は図法の設計の一部で、d3 の lobes は
-   * 回転座標に固定されているため、回転すると断裂が大陸を切ってしまう (DESIGN.md)。
-   */
-  fixedLon?: number;
   note: Record<Lang, string>;
 }
 
@@ -71,18 +65,6 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     note: {
       ja: '16 世紀から。緯線は等間隔の直線、経線は正弦曲線。中央経線と赤道の上では長さも正しい。',
       en: 'In use since the 16th century. Straight equally spaced parallels, sinusoidal meridians. Distances are true along the equator and the central meridian.',
-    },
-  },
-  {
-    id: 'goode',
-    label: { ja: 'グード (断裂)', en: 'Goode homolosine (interrupted)' },
-    family: 'pseudocylindrical',
-    create: () => geoInterruptedHomolosine(),
-    poleLine: false,
-    fixedLon: 0,
-    note: {
-      ja: '1923 年。緯度 40°44′ より低緯度はサンソン、高緯度はモルワイデを接いだもの。海を切って大陸の形を守る。断裂の位置は設計の一部なので中央経線は 0° に固定。',
-      en: '1923. Sinusoidal below 40°44′ latitude, Mollweide above, with the oceans interrupted to keep the continents in shape. The interruptions are part of the design, so the central meridian is fixed at 0°.',
     },
   },
   {
@@ -219,11 +201,6 @@ export const FAMILIES: readonly Family[] = [
   'pseudoconic',
   'azimuthal',
 ];
-
-/** 描画に使う中央経線。断裂図法は固定値を返す。 */
-export function effectiveLon(def: ProjectionDef, lon: number): number {
-  return def.fixedLon ?? lon;
-}
 
 export function findProjection(id: string): ProjectionDef {
   return PROJECTIONS.find((p) => p.id === id) ?? PROJECTIONS[0]!;
