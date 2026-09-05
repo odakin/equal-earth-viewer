@@ -9,8 +9,9 @@
   + プリセット「アメリカ中心 90°W」を先頭に追加
 - **地図の横ドラッグ / スワイプで中央経線を回す** (Pointer Events、表示幅 = 360° 換算、
   `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
-- **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 10°E / 150°E) のみ (user 指摘、DESIGN.md)
+- **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
+- **綿密チェック (user 指摘)**: イコールアースの極は線 (点は誤り) / Gall-Peters の歪み方向 / Europe プリセット 0° / 出典表記 を訂正、表 = DESIGN.md 末尾
 - **日本語 UI の英字排除** (図法名・タイトル・プリセット経度を和文表記、SVG/PNG と出典は例外)
 - **英語 UI** (同一ファイル内 ja/en 切替、`navigator.language` 自動判定 + `?lang=` + ボタン。理由 = DESIGN.md)
 - **修正**: URL に `lon` が無いとき `Number(null) = 0` で既定値を潰していた

@@ -22,10 +22,11 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     id: 'equal-earth',
     label: { ja: 'イコールアース', en: 'Equal Earth' },
     create: () => geoEqualEarth(),
-    poleLine: false,
+    // 極は赤道の約 0.59 倍の長さの線 (scripts/verify.mjs 項目 E が実測で守る)
+    poleLine: true,
     note: {
-      ja: '見た目の自然さと厳密な正積を両立させた 2018 年の図法 (出典は脚注)。',
-      en: 'A 2018 projection combining a natural look with exact equal-area (Šavrič–Patterson–Jenny).',
+      ja: 'エケルト第4を土台に見た目の自然さと厳密な正積を両立させた 2018 年の図法 (出典は脚注)。極は赤道の約 6 割の長さ。',
+      en: 'A 2018 projection built on Eckert IV, combining a natural look with exact equal-area (Šavrič–Patterson–Jenny). Pole lines are about 0.6 of the equator.',
     },
   },
   {
@@ -54,8 +55,8 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     create: () => geoCylindricalEqualArea().parallel(45),
     poleLine: true,
     note: {
-      ja: '標準緯線 45° の円筒図法。高緯度の形が極端に縦長になる。',
-      en: 'Cylindrical with standard parallels at 45°. High-latitude shapes become extremely tall.',
+      ja: '標準緯線 45° の円筒図法。低緯度は縦長に、高緯度は横に潰れて、形の歪みが極端。',
+      en: 'Cylindrical with standard parallels at 45°. Low latitudes are stretched tall, high latitudes squashed flat.',
     },
   },
 ];

@@ -27,7 +27,7 @@ const JA: Dict = {
   'readout.seam': '裂け目',
   'preset.americas': 'アメリカ中心 西経90°',
   'preset.pacific': '太平洋中心 東経150°',
-  'preset.europe': 'ヨーロッパ・アフリカ中心 東経10°',
+  'preset.europe': 'ヨーロッパ・アフリカ中心 0°',
   'spin.start': '回す',
   'spin.stop': '停止',
   'drag.hint': '地図を左右にドラッグ (スワイプ) しても回せます。',
@@ -41,7 +41,7 @@ const JA: Dict = {
   'footer.tissot':
     'ティソーの指示楕円は半径約 500 km の円を 30° 間隔に並べたものです。どの図法も正積なので<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。',
   'footer.src':
-    '図法: イコールアース = Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)',
+    '図法: イコールアース = Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; 2018 年公開) ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)',
   'lang.switch': 'English',
   'lang.switch.aria': '英語に切り替え',
   'pole.point': '極は点',
@@ -62,7 +62,7 @@ const EN: Dict = {
   'readout.seam': 'Seam',
   'preset.americas': 'Americas 90°W',
   'preset.pacific': 'Pacific 150°E',
-  'preset.europe': 'Europe & Africa 10°E',
+  'preset.europe': 'Europe & Africa 0°',
   'spin.start': 'Spin',
   'spin.stop': 'Stop',
   'drag.hint': 'You can also drag (swipe) the map sideways.',
@@ -76,7 +76,7 @@ const EN: Dict = {
   'footer.tissot':
     "Tissot's indicatrices are circles of about 500 km radius placed every 30°. All projections here are equal-area, so <strong>every circle has the same area</strong>; only the shape distortion shows.",
   'footer.src':
-    'Projection: Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> / Rendering: d3-geo / Coastlines: Natural Earth (world-atlas 110m)',
+    'Projection: Šavrič, Patterson &amp; Jenny, <em>Int. J. Geogr. Inf. Sci.</em> 33, 454 (2019; online 2018) / Rendering: d3-geo / Coastlines: Natural Earth (world-atlas 110m)',
   'lang.switch': '日本語',
   'lang.switch.aria': 'Switch to Japanese',
   'pole.point': 'Pole is a point',

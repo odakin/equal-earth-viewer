@@ -115,6 +115,19 @@ console.log('\nC. 受け入れ条件: lon=-90 (既定値) でアメリカ中心'
   );
 }
 
+console.log('\nE. projections.ts の極の扱い (poleLine) と実測が一致する');
+{
+  const EXPECT = { 'equal-earth': true, mollweide: false, eckert4: true, 'gall-peters': true };
+  for (const [id, make] of PROJECTIONS) {
+    const p = make().rotate([0, 0, 0]).translate([0, 0]).scale(1);
+    const eq = p([180, 0])[0] - p([-180, 0])[0];
+    const pole = p([179.999, 89.999])[0] - p([-179.999, 89.999])[0];
+    const ratio = pole / eq;
+    const isLine = ratio > 0.05;
+    check(isLine === EXPECT[id], `${id}: 極は${EXPECT[id] ? '線' : '点'}`, `極線/赤道 = ${ratio.toFixed(3)}`);
+  }
+}
+
 console.log('\nD. 全図法で陸地・外郭の path が生成できる');
 for (const [id, create] of PROJECTIONS) {
   const { projection, path } = fitted(create);
