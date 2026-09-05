@@ -93,9 +93,6 @@ export function wireControls(host: ControlsHost): void {
     host.setState({ lat: Math.max(-90, Math.min(90, value)) }, true);
   }
   latNumber.addEventListener('input', () => setLatByUser(Number(latNumber.value)));
-  for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset-lat')) {
-    btn.addEventListener('click', () => setLatByUser(Number(btn.dataset['lat'])));
-  }
 
   spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
 
@@ -214,7 +211,6 @@ export function syncControlsUi(state: AppState): void {
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
-  must<HTMLElement>('#lat-presets').hidden = !oblique;
   must<HTMLElement>('#lat-readout-wrap').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
   must<SVGSVGElement>('#map').style.touchAction = oblique ? 'none' : 'pan-y';
