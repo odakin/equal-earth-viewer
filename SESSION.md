@@ -4,7 +4,7 @@
 
 初版を実装。仕様書の必須 (1〜5) と「望ましい」(6〜9) を全て実装済み。
 
-- `npm run build` は警告なしで通り、`dist/index.html` 単一ファイル (約 94 KB) を出力
+- `npm run build` は警告なしで通り、`docs/index.html` 単一ファイル (約 94 KB) を出力
 - `npm test` (`scripts/verify.mjs`) 全項目 pass
 - `npx tsc --noEmit` エラーなし
 
@@ -17,4 +17,4 @@
 ## 次にやるなら
 
 - 目視確認で出た調整
-- 公開する場合は GitHub Pages 設置 (`dist/index.html` を置くだけ)
+- 公開する場合は GitHub Pages 設置 (`docs/index.html` を置くだけ)

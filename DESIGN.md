@@ -4,7 +4,7 @@
 
 ## 成果物を単一 HTML ファイルにする
 
-**判断**: `vite-plugin-singlefile` で `dist/index.html` 1 ファイルに全部 inline する。
+**判断**: `vite-plugin-singlefile` で `docs/index.html` 1 ファイルに全部 inline する。
 
 **Why**: これは教材であり、第一の性質は「配布物」であること。単一ファイルなら
 ダブルクリックで開き、USB でもメールでも渡せ、静的ホスティングにもそのまま置ける。

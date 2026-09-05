@@ -14,13 +14,13 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 | コマンド | 内容 |
 |---|---|
 | `npm run dev` | 開発サーバー (既定 5173) |
-| `npm run build` | `tsc --noEmit` → `vite build` → **`dist/index.html` 1 ファイル**を生成 |
+| `npm run build` | `tsc --noEmit` → `vite build` → **`docs/index.html` 1 ファイル**を生成 |
 | `npm test` | 投影ロジックの回帰テスト (`scripts/verify.mjs`、DOM 不要) |
 | `npm run typecheck` | 型チェックのみ |
 
 ## 配布
 
-`npm run build` の成果物は **`dist/index.html` ただ 1 つ** (約 94 KB)。JS / CSS / 海岸線 TopoJSON を
+`npm run build` の成果物は **`docs/index.html` ただ 1 つ** (約 94 KB)。JS / CSS / 海岸線 TopoJSON を
 すべて inline 済みなので、以下のいずれでもそのまま動く:
 
 - ファイルをダブルクリック (`file://` で開く。ビルド環境もネットワークも不要)
