@@ -1,0 +1,14 @@
+# 依存とビルド成果物
+node_modules/
+dist/
+.vite/
+
+# OS / エディタ
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# ログ
+*.log
+npm-debug.log*

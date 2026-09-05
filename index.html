@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Equal Earth 図法ビューア</title>
+    <meta
+      name="description"
+      content="Equal Earth 図法の世界地図で、中央経線を動かして裂け目の位置と面積の歪みを観察する教材。"
+    />
+  </head>
+  <body>
+    <header class="wrap">
+      <h1>Equal Earth 図法ビューア</h1>
+      <p class="lead">
+        世界地図は必ずどこかで切れています。中央経線を動かして、
+        <strong>裂け目がどこに来るか</strong>を確かめてください。
+      </p>
+    </header>
+
+    <section class="wrap panel" aria-label="中央経線の操作">
+      <div class="row">
+        <label for="lon-slider">中央経線</label>
+        <input id="lon-slider" class="grow" type="range" min="-180" max="180" step="1" value="0" />
+        <input
+          id="lon-number"
+          type="number"
+          min="-180"
+          max="180"
+          step="1"
+          value="0"
+          aria-label="中央経線(度)"
+        />
+        <span class="unit">°</span>
+      </div>
+
+      <div class="row readouts">
+        <span>中央 <strong id="lon-readout">—</strong></span>
+        <span class="sep">/</span>
+        <span>裂け目 <strong id="seam-readout">—</strong></span>
+      </div>
+
+      <div class="row">
+        <button class="preset" type="button" data-lon="0">大西洋中心 0°</button>
+        <button class="preset" type="button" data-lon="150">太平洋中心 150°E</button>
+        <button class="preset" type="button" data-lon="10">ヨーロッパ中心 10°E</button>
+        <button id="spin" type="button" aria-pressed="false">回す</button>
+      </div>
+    </section>
+
+    <div class="wrap map-wrap">
+      <svg id="map" role="img" aria-label="選択した図法で描いた世界地図"></svg>
+    </div>
+
+    <section class="wrap panel" aria-label="表示の設定">
+      <div class="row">
+        <label for="proj-select">図法</label>
+        <select id="proj-select"></select>
+      </div>
+      <p id="proj-note" class="note">—</p>
+
+      <div class="row toggles">
+        <label><input type="checkbox" id="toggle-land" checked /> 陸地</label>
+        <label><input type="checkbox" id="toggle-graticule" checked /> 経緯線</label>
+        <label><input type="checkbox" id="toggle-tissot" /> ティソーの指示楕円</label>
+      </div>
+
+      <div class="row">
+        <button id="export-svg" type="button">SVG を保存</button>
+        <button id="export-png" type="button">PNG を保存 (2x)</button>
+      </div>
+    </section>
+
+    <footer class="wrap">
+      <p>
+        ティソーの指示楕円は半径約 500 km の円を 30° 間隔に並べたものです。
+        正積図法では<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。
+      </p>
+      <p class="src">
+        図法: Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／
+        描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)
+      </p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
