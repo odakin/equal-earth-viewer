@@ -120,7 +120,11 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
     startX = ev.clientX;
     startLon = host.getState().lon;
     stopSpin();
-    map.setPointerCapture(ev.pointerId);
+    try {
+      map.setPointerCapture(ev.pointerId);
+    } catch {
+      // 合成イベント等で active pointer が無い場合は capture なしで続行
+    }
     map.classList.add('dragging');
   });
 
