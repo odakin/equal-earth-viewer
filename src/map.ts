@@ -1,5 +1,5 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
-import { EQUATOR, GRATICULE, LAND, SPHERE, meridian, tissotCircles } from './geo';
+import { GRATICULE, LAND, SPHERE, tissotCircles } from './geo';
 import { findProjection, type ProjectionDef } from './projections';
 import type { AppState } from './state';
 import type { Theme } from './theme';
@@ -55,8 +55,6 @@ interface MapNodes {
   ocean: SVGPathElement;
   graticule: SVGPathElement;
   land: SVGPathElement;
-  equator: SVGPathElement;
-  meridian: SVGPathElement;
   tissot: SVGGElement;
   outline: SVGPathElement;
 }
@@ -79,21 +77,17 @@ function ensureNodes(svg: SVGSVGElement): MapNodes {
     ocean: el('path', 'ocean'),
     graticule: el('path', 'graticule'),
     land: el('path', 'land'),
-    equator: el('path', 'major'),
-    meridian: el('path', 'major'),
     tissot: el('g', 'tissot'),
     outline: el('path', 'outline'),
   };
   for (let i = 0; i < TISSOT.length; i += 1) nodes.tissot.appendChild(el('path'));
 
-  // 重ね順: 海 → 経緯線 → 陸 → 強調線 → ティソー → 外郭
+  // 重ね順: 海 → 経緯線 → 陸 → ティソー → 外郭
   svg.append(
     nodes.style,
     nodes.ocean,
     nodes.graticule,
     nodes.land,
-    nodes.equator,
-    nodes.meridian,
     nodes.tissot,
     nodes.outline,
   );
@@ -106,7 +100,6 @@ function svgCss(theme: Theme): string {
     `.ocean{fill:${theme.ocean}}`,
     `.land{fill:${theme.land};stroke:${theme.landStroke};stroke-width:.5}`,
     `.graticule{fill:none;stroke:${theme.graticule};stroke-width:.6}`,
-    `.major{fill:none;stroke:${theme.major};stroke-width:1.6}`,
     `.tissot path{fill:${theme.tissotFill};stroke:${theme.tissotStroke};stroke-width:.7}`,
     `.outline{fill:none;stroke:${theme.outline};stroke-width:1.2}`,
   ].join('');
@@ -139,8 +132,6 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   const spherePath = pathGen(SPHERE) ?? '';
   nodes.ocean.setAttribute('d', spherePath);
   nodes.outline.setAttribute('d', spherePath);
-  nodes.equator.setAttribute('d', pathGen(EQUATOR) ?? '');
-  nodes.meridian.setAttribute('d', pathGen(meridian(state.lon)) ?? '');
 
   show(nodes.graticule, state.showGraticule);
   if (state.showGraticule) nodes.graticule.setAttribute('d', pathGen(GRATICULE) ?? '');

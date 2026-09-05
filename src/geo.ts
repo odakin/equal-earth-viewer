@@ -1,7 +1,7 @@
 import { t, type Lang } from './i18n';
 import { geoGraticule, geoCircle, type GeoSphere } from 'd3-geo';
 import { feature } from 'topojson-client';
-import type { FeatureCollection, Geometry, LineString, MultiLineString, Polygon } from 'geojson';
+import type { FeatureCollection, Geometry, MultiLineString, Polygon } from 'geojson';
 import landTopo from 'world-atlas/land-110m.json';
 
 /** 地図の外郭 (投影された地球全体の輪郭)。 */
@@ -22,26 +22,6 @@ export const GRATICULE: MultiLineString = geoGraticule()
     [180, 90],
   ])();
 
-function sample(from: number, to: number, step: number): number[] {
-  const out: number[] = [];
-  for (let v = from; v <= to; v += step) out.push(v);
-  if (out[out.length - 1] !== to) out.push(to);
-  return out;
-}
-
-/** 赤道。太線で強調するため graticule とは別に持つ。 */
-export const EQUATOR: LineString = {
-  type: 'LineString',
-  coordinates: sample(-180, 180, 2).map((lon) => [lon, 0]),
-};
-
-/** 指定経度の子午線 (中央経線の強調用)。 */
-export function meridian(lon: number): LineString {
-  return {
-    type: 'LineString',
-    coordinates: sample(-90, 90, 2).map((lat) => [lon, lat]),
-  };
-}
 
 /**
  * ティソーの指示楕円。半径 4.5° ≒ 500 km の測地円を 30° 格子に置く。

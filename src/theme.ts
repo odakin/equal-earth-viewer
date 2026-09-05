@@ -11,8 +11,6 @@ export interface Theme {
   land: string;
   landStroke: string;
   graticule: string;
-  /** 赤道・中央経線 (太線) */
-  major: string;
   outline: string;
   tissotFill: string;
   tissotStroke: string;
@@ -24,7 +22,6 @@ export const themes = {
     land: '#93ab8b',
     landStroke: '#7a9172',
     graticule: '#d8d8d4',
-    major: '#9a9a94',
     outline: '#8c8c86',
     tissotFill: 'rgba(191, 97, 63, 0.30)',
     tissotStroke: 'rgba(150, 70, 45, 0.80)',
@@ -34,7 +31,6 @@ export const themes = {
     land: '#5f7a59',
     landStroke: '#7a9673',
     graticule: '#333a42',
-    major: '#5c6672',
     outline: '#6c7683',
     tissotFill: 'rgba(224, 138, 96, 0.28)',
     tissotStroke: 'rgba(235, 160, 120, 0.85)',

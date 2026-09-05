@@ -38,7 +38,7 @@ src/
   state.ts          AppState の型と URL 同期
   i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
   projections.ts    図法の定義一覧 (名前・族・ファクトリ・極が線か。すべて正積 = verify.mjs F が実測)
-  geo.ts            陸地 / 経緯線 / 赤道 / ティソー円の GeoJSON
+  geo.ts            陸地 / 経緯線 / ティソー円の GeoJSON
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
   export.ts         SVG / PNG 書き出し
