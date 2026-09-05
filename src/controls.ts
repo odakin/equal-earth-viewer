@@ -1,7 +1,7 @@
 import { downloadPng, downloadSvg } from './export';
 import { formatLon, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
-import { PROJECTIONS, describeProjection, findProjection } from './projections';
+import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
 import type { AppState } from './state';
 
 /** 「回す」の角速度 (度/秒)。 */
@@ -25,11 +25,16 @@ export function wireControls(host: ControlsHost): void {
   const spinBtn = must<HTMLButtonElement>('#spin');
   const projSelect = must<HTMLSelectElement>('#proj-select');
 
-  for (const def of PROJECTIONS) {
-    const opt = document.createElement('option');
-    opt.value = def.id;
-    opt.textContent = def.label[host.getState().lang];
-    projSelect.appendChild(opt);
+  for (const family of FAMILIES) {
+    const group = document.createElement('optgroup');
+    group.dataset['family'] = family;
+    for (const def of PROJECTIONS) {
+      if (def.family !== family) continue;
+      const opt = document.createElement('option');
+      opt.value = def.id;
+      group.appendChild(opt);
+    }
+    projSelect.appendChild(group);
   }
 
   let spinning = false;
@@ -176,6 +181,9 @@ export function syncControlsUi(state: AppState): void {
   const projSelect = must<HTMLSelectElement>('#proj-select');
   for (const opt of projSelect.options) {
     opt.textContent = findProjection(opt.value).label[state.lang];
+  }
+  for (const group of projSelect.querySelectorAll('optgroup')) {
+    group.label = t(state.lang, `family.${group.dataset['family'] ?? ''}`);
   }
   projSelect.value = state.projectionId;
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;

@@ -37,7 +37,7 @@ src/
   main.ts           起動・状態の集約・render の呼び出し
   state.ts          AppState の型と URL 同期
   i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
-  projections.ts    図法の定義一覧 (名前・ファクトリ・極が線か。すべて正積)
+  projections.ts    図法の定義一覧 (名前・族・ファクトリ・極が線か。すべて正積 = verify.mjs F が実測)
   geo.ts            陸地 / 経緯線 / 赤道 / ティソー円の GeoJSON
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
@@ -56,7 +56,7 @@ src/
 | キー | 意味 |
 |---|---|
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
-| `proj` | `equal-earth` / `mollweide` / `eckert4` / `gall-peters` (すべて正積) |
+| `proj` | `projections.ts` の id (15 種、すべて正積: equal-earth / mollweide / sinusoidal / goode / eckert4 / eckert6 / wagner4 / boggs / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 
@@ -67,7 +67,8 @@ src/
 - **`map.ts` は図法ごとに `fitWidth` を 1 回だけ実行して拡大率と高さをキャッシュする。** これは
   「経度回転では投影された球の外郭が合同」という性質に依存している。斜軸投影 (rotate の第 2・第 3
   引数) を導入するとこの前提が崩れるので、そのときはキャッシュ設計から見直すこと。前提は
-  `npm test` の項目 A が実測で守っている。
+  `npm test` の項目 A が実測で守っている (断裂図法・擬円錐・方位でも成立することを確認済)。
+- **図法を追加したら `scripts/verify.mjs` の PROJECTIONS 鏡にも足す** (極の扱い E / 正積 F / 外郭不変 A を実測で検査)。
 - **地図の色は `theme.ts` が正本** (CSS 変数ではない)。SVG / PNG 書き出しでは外部 CSS が効かないため、
   色は SVG 内の `<style>` に焼き込んでいる。画面と書き出しで色が食い違わないよう、
   画面表示も書き出しも同じ `renderInto()` を通す。

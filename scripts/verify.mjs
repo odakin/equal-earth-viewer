@@ -12,11 +12,19 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { geoEqualEarth, geoPath } from 'd3-geo';
+import { geoArea, geoAzimuthalEqualArea, geoCircle, geoEqualEarth, geoPath } from 'd3-geo';
 import {
-  geoMollweide,
-  geoEckert4,
+  geoBoggs,
+  geoBonne,
   geoCylindricalEqualArea,
+  geoEckert4,
+  geoEckert6,
+  geoHammer,
+  geoInterruptedHomolosine,
+  geoMollweide,
+  geoSinusoidal,
+  geoWagner4,
+  geoWagner7,
 } from 'd3-geo-projection';
 import { feature } from 'topojson-client';
 
@@ -29,11 +37,23 @@ const LAND = feature(landTopo, landTopo.objects.land);
 const WIDTH = 960;
 const SPHERE = { type: 'Sphere' };
 
+// src/projections.ts の鏡 (id, factory, 極は線か)。追加したら両方に書く。
 const PROJECTIONS = [
-  ['equal-earth', () => geoEqualEarth()],
-  ['mollweide', () => geoMollweide()],
-  ['eckert4', () => geoEckert4()],
-  ['gall-peters', () => geoCylindricalEqualArea().parallel(45)],
+  ['equal-earth', () => geoEqualEarth(), true],
+  ['mollweide', () => geoMollweide(), false],
+  ['sinusoidal', () => geoSinusoidal(), false],
+  ['goode', () => geoInterruptedHomolosine(), false],
+  ['eckert4', () => geoEckert4(), true],
+  ['eckert6', () => geoEckert6(), true],
+  ['wagner4', () => geoWagner4(), true],
+  ['boggs', () => geoBoggs(), false],
+  ['lambert-cea', () => geoCylindricalEqualArea().parallel(0), true],
+  ['behrmann', () => geoCylindricalEqualArea().parallel(30), true],
+  ['gall-peters', () => geoCylindricalEqualArea().parallel(45), true],
+  ['hammer', () => geoHammer(), false],
+  ['wagner7', () => geoWagner7(), true],
+  ['bonne', () => geoBonne(), false],
+  ['lambert-azimuthal', () => geoAzimuthalEqualArea(), false],
 ];
 
 let failures = 0;
@@ -116,16 +136,29 @@ console.log('\nC. 受け入れ条件: lon=-90 (既定値) でアメリカ中心'
 }
 
 console.log('\nE. projections.ts の極の扱い (poleLine) と実測が一致する');
-{
-  const EXPECT = { 'equal-earth': true, mollweide: false, eckert4: true, 'gall-peters': true };
-  for (const [id, make] of PROJECTIONS) {
-    const p = make().rotate([0, 0, 0]).translate([0, 0]).scale(1);
-    const eq = p([180, 0])[0] - p([-180, 0])[0];
-    const pole = p([179.999, 89.999])[0] - p([-179.999, 89.999])[0];
-    const ratio = pole / eq;
-    const isLine = ratio > 0.05;
-    check(isLine === EXPECT[id], `${id}: 極は${EXPECT[id] ? '線' : '点'}`, `極線/赤道 = ${ratio.toFixed(3)}`);
-  }
+for (const [id, make, expectLine] of PROJECTIONS) {
+  const p = make().rotate([0, 0, 0]).translate([0, 0]).scale(1);
+  // 極のすぐそばと赤道で、経度方向の局所スケールを比べる (断裂図法でも 1 lobe 内に収まる小さい幅で測る)
+  const d = 0.5;
+  const sx = (lat) => p([d, lat])[0] - p([-d, lat])[0];
+  const ratio = sx(89.99) / sx(0);
+  const isLine = ratio > 0.05;
+  check(isLine === expectLine, `${id}: 極は${expectLine ? '線' : '点'}`, `極付近/赤道 の経度方向スケール比 = ${ratio.toFixed(3)}`);
+}
+
+console.log('\nF. 全図法が正積である (ティソー円の投影面積 / 球面面積 が場所によらず一定)');
+for (const [id, make] of PROJECTIONS) {
+  const { path } = fitted(make);
+  const circle = geoCircle().radius(4.5).precision(0.5);
+  // 断裂 (グード) と外周 (ボンヌ・方位) を避けた中心を選ぶ
+  const centers = [[0, 0], [0, 60], [60, -30], [150, -45], [-120, 50], [30, 30], [-60, -30]];
+  const ratios = centers.map((c) => {
+    const g = circle.center(c)();
+    return path.area(g) / geoArea(g);
+  });
+  const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+  const spread = Math.max(...ratios.map((r) => Math.abs(r / mean - 1)));
+  check(spread < 0.01, `${id}: 面積比のばらつき ${(spread * 100).toFixed(3)}%`, '許容 1%');
 }
 
 console.log('\nD. 全図法で陸地・外郭の path が生成できる');

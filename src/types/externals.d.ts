@@ -1,11 +1,19 @@
 // d3-geo-projection は型定義を同梱しておらず、DefinitelyTyped にも
 // @types/d3-geo-projection が存在しない (2026-09 時点で確認)。
-// このアプリが実際に使う 4 図法ぶんだけを最小限で宣言する。
+// このアプリが実際に使う図法ぶんだけを最小限で宣言する。
 declare module 'd3-geo-projection' {
   import type { GeoProjection } from 'd3-geo';
 
   export function geoMollweide(): GeoProjection;
   export function geoEckert4(): GeoProjection;
+  export function geoEckert6(): GeoProjection;
+  export function geoSinusoidal(): GeoProjection;
+  export function geoInterruptedHomolosine(): GeoProjection;
+  export function geoHammer(): GeoProjection;
+  export function geoWagner4(): GeoProjection;
+  export function geoWagner7(): GeoProjection;
+  export function geoBoggs(): GeoProjection;
+  export function geoBonne(): GeoProjection;
 
   /** 標準緯線を持つ円筒正積図法 (parallel 45° で Gall-Peters になる)。 */
   export interface GeoCylindricalEqualAreaProjection extends GeoProjection {
