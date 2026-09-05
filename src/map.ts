@@ -134,8 +134,10 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme): n
   svg.setAttribute('viewBox', `0 0 ${MAP_WIDTH} ${height}`);
   nodes.style.textContent = svgCss(theme);
 
-  nodes.ocean.setAttribute('d', pathGen(SPHERE) ?? '');
-  nodes.outline.setAttribute('d', pathGen(SPHERE) ?? '');
+  // 海の塗りと外郭線は同じ形。毎フレーム通る経路なので投影計算は 1 回で済ませる。
+  const spherePath = pathGen(SPHERE) ?? '';
+  nodes.ocean.setAttribute('d', spherePath);
+  nodes.outline.setAttribute('d', spherePath);
   nodes.equator.setAttribute('d', pathGen(EQUATOR) ?? '');
   nodes.meridian.setAttribute('d', pathGen(meridian(state.lon)) ?? '');
 
