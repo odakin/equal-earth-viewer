@@ -39,7 +39,7 @@ src/
   i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
   projections.ts    図法の定義一覧 (名前・族・ファクトリ・極が線か。すべて正積 = verify.mjs F が実測)
   geo.ts            国 / 陸地 (= 国の merge) / 国境 / 経緯線 / ティソー円の GeoJSON + 国名 lookup
-  data/country-names.json  国 key → {en, ja} (Natural Earth 110m admin_0 の NAME / NAME_JA から生成、177 か国)
+  data/country-names.json  国 key → {en, ja, c} (Natural Earth 110m admin_0 の NAME / NAME_JA / MAPCOLOR7 から生成、177 か国)
   map.ts            描画ロジック (renderInto に集約)
   controls.ts       コントロールのイベント配線と UI 同期
   export.ts         SVG / PNG 書き出し
@@ -59,7 +59,7 @@ src/
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
 | `lat` | 中心緯度 (-90〜90)。方位図法 (`oblique`) のときだけ効く。既定 0 |
 | `proj` | `projections.ts` の id (11 種、すべて正積: equal-earth / mollweide / sinusoidal / eckert4 / lambert-cea / behrmann / gall-peters / hammer / wagner7 / bonne / lambert-azimuthal) |
-| `grat` `tissot` `countries` | 経緯線 / ティソー円 / 国境+国名 の表示 (`1` / `0`)。陸地は常に描く |
+| `grat` `tissot` `countries` | 経緯線 / ティソー円 / 国 (塗り分け+国境+国名) の表示 (`1` / `0`)。陸地は常に描く |
 | `south` | `1` で南を上に (地図全体を 180° 回転、鏡像ではない) |
 | `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 

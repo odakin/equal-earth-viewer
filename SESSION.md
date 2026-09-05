@@ -11,7 +11,7 @@
   `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
 - **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
-- **国トグル** (国境線 + hover / tap で国名、日英。データ = Natural Earth 110m → `src/data/country-names.json`、陸塊は countries の merge に切替、verify G)
+- **国トグル** (MAPCOLOR7 で 7 色塗り分け + 国境線 + hover / tap で国名、日英。データ = Natural Earth 110m → `src/data/country-names.json`、陸塊は countries の merge に切替、verify G)
 - **陸地トグル削除** (格子だけの図は趣旨外)
 - **「南を上に」ボタン** (180° 回転、鏡像でない。「回す」の隣、押下状態表示。ドラッグ向きも反転、URL `south=1`、verify A3)
 - **赤道・中央経線の太線を削除** (経緯線のみ、裂け目教材の名残) + fix: `[hidden]{display:none!important}` (中心緯度欄が非方位図法でも見えていた)

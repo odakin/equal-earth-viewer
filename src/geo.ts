@@ -37,7 +37,13 @@ export const LAND: MultiPolygon = merge(
 /** 国境線 = 2 国が接する弧だけ (海岸線は含めない)。 */
 export const BORDERS: MultiLineString = mesh(countriesTopo, countryGeoms, (a, b) => a !== b);
 
-const NAMES = countryNames as Record<string, { en: string; ja: string }>;
+const NAMES = countryNames as Record<string, { en: string; ja: string; c: number }>;
+
+/** 国の地図色番号 1〜7 (Natural Earth MAPCOLOR7 = 隣接国が同色にならない配色)。南極は 0 で別扱い。 */
+export function countryColorIndex(key: string): number {
+  if (key === '010') return 0; // 南極
+  return NAMES[key]?.c ?? 1;
+}
 
 /** 国名 (Natural Earth の NAME / NAME_JA)。 */
 export function countryName(key: string, lang: Lang): string {

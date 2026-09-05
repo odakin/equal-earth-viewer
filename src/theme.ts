@@ -13,6 +13,8 @@ export interface Theme {
   graticule: string;
   /** 国境線 */
   border: string;
+  /** 国モードの塗り分け。index 0 = 南極、1〜7 = MAPCOLOR7 */
+  countryFills: readonly string[];
   outline: string;
   tissotFill: string;
   tissotStroke: string;
@@ -24,7 +26,8 @@ export const themes = {
     land: '#93ab8b',
     landStroke: '#7a9172',
     graticule: '#d8d8d4',
-    border: '#5e6e58',
+    border: '#6b7a66',
+    countryFills: ['#ecece6', '#b8c9a4', '#d9c7a0', '#c9aca4', '#a9bfc8', '#c8b9d0', '#dcc79b', '#a8c3b6'],
     outline: '#8c8c86',
     tissotFill: 'rgba(191, 97, 63, 0.30)',
     tissotStroke: 'rgba(150, 70, 45, 0.80)',
@@ -34,7 +37,8 @@ export const themes = {
     land: '#5f7a59',
     landStroke: '#7a9673',
     graticule: '#333a42',
-    border: '#a8bfa2',
+    border: '#9fb39a',
+    countryFills: ['#3a3f45', '#5f7a59', '#7d6f4c', '#7a5b57', '#4f6b7a', '#6b5c78', '#7f6e46', '#4e6f63'],
     outline: '#6c7683',
     tissotFill: 'rgba(224, 138, 96, 0.28)',
     tissotStroke: 'rgba(235, 160, 120, 0.85)',
