@@ -207,12 +207,14 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme, de
 /** 国名ラベルの画面上の文字サイズ (px)。拡大しても画面上ではこの大きさのまま */
 const LABEL_PX = 9;
 
-/**
- * 最大倍率で許す「国の幅からのはみ出し」(画面 px)。倍率 1 では 0、倍率とともに線形に増える。
- * 寄るほど隣国は画面上で遠ざかるので、はみ出しても重ならない。最大倍率では長い国名でも収まる
- * 値にして、全単位の名前が出るようにする (user 指摘「閾値が厳しすぎ」2026-09-05)。
- */
+/** 面積の平方根は横幅そのものではない。長い国名も候補に含め、重なりを別途判定する。 */
+const LABEL_WIDTH_FACTOR = 2.5;
+const LABEL_GAP_PX = 2;
+/** 拡大するほど小国の長い名前も候補にする、画面上のはみ出し許容。 */
 const LABEL_SLACK_PX_AT_MAX = 200;
+/** 大国から配置する。DOM の順序は変更しない。 */
+const LABEL_ORDER = COUNTRIES.map((country, index) => ({ country, index }))
+  .sort((a, b) => b.country.properties.area - a.country.properties.area);
 
 /** 文字列の幅を文字サイズの倍数で見積もる (CJK ≒ 1 文字幅、英数 ≒ 0.55) */
 function textWidthEm(s: string): number {
@@ -222,9 +224,8 @@ function textWidthEm(s: string): number {
 }
 
 /**
- * 国名ラベル。全国ぶん置くが、「文字が国の幅 + 倍率に応じたはみ出し許容に収まる」ものだけ表示する。
- * 文字は画面上で一定サイズ (SVG 単位では 1/zoom) なので、寄るほど小さい国の名前が現れる。
- * 国の幅は正積の性質から sqrt(球面面積 × scale²) で見積もる (回転で変わらず、毎フレーム安い)。
+ * 9px の文字サイズを維持し、広めの候補条件とラベル間の衝突判定を分離する。
+ * 置き場所は Natural Earth のラベル点。重なる場合は大国を優先する。
  */
 function renderLabels(nodes: MapNodes, state: AppState, projection: GeoProjection, svg: SVGSVGElement): void {
   const lang = state.lang;
@@ -242,17 +243,24 @@ function renderLabels(nodes: MapNodes, state: AppState, projection: GeoProjectio
   const fontSvg = LABEL_PX * svgPerPx;
   const slackSvg = (LABEL_SLACK_PX_AT_MAX * (state.zoom - 1)) / (ZOOM_MAX - 1) * svgPerPx;
   const k = projection.scale();
-  COUNTRIES.forEach((c, i) => {
+  const gap = LABEL_GAP_PX * svgPerPx;
+  const placed: Array<{ x: number; y: number; width: number }> = [];
+  LABEL_ORDER.forEach(({ country: c, index: i }) => {
     const t = children.item(i) as SVGTextElement | null;
     if (!t) return;
     const name = t.textContent ?? '';
     const width = textWidthEm(name) * fontSvg;
     const diameter = Math.sqrt(c.properties.area) * k;
-    const p = width <= diameter * 0.95 + slackSvg ? projection(c.properties.label) : null;
-    if (p === null) {
+    const p = width <= diameter * LABEL_WIDTH_FACTOR + slackSvg ? projection(c.properties.label) : null;
+    const collides = p !== null && placed.some(other =>
+      Math.abs(p[0] - other.x) < (width + other.width) / 2 + gap &&
+      Math.abs(p[1] - other.y) < fontSvg + gap,
+    );
+    if (p === null || collides) {
       t.style.display = 'none';
       return;
     }
+    placed.push({ x: p[0], y: p[1], width });
     t.style.display = '';
     t.setAttribute('x', p[0].toFixed(1));
     t.setAttribute('y', p[1].toFixed(1));
