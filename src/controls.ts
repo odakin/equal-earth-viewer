@@ -98,6 +98,10 @@ export function wireControls(host: ControlsHost): void {
 
   wireMapDrag(host, stopSpin);
 
+  must<HTMLButtonElement>('#toggle-south').addEventListener('click', () => {
+    host.setState({ southUp: !host.getState().southUp }, true);
+  });
+
   must<HTMLButtonElement>('#lang-toggle').addEventListener('click', () => {
     host.setState({ lang: host.getState().lang === 'ja' ? 'en' : 'ja' }, true);
   });
@@ -106,7 +110,6 @@ export function wireControls(host: ControlsHost): void {
     ['#toggle-graticule', 'showGraticule'],
     ['#toggle-land', 'showLand'],
     ['#toggle-tissot', 'showTissot'],
-    ['#toggle-south', 'southUp'],
   ];
   for (const [selector, key] of toggles) {
     const box = must<HTMLInputElement>(selector);
@@ -211,7 +214,7 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
-  must<HTMLInputElement>('#toggle-south').checked = state.southUp;
+  must<HTMLButtonElement>('#toggle-south').setAttribute('aria-pressed', state.southUp ? 'true' : 'false');
 
   const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
