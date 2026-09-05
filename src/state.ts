@@ -1,3 +1,4 @@
+import { detectLang, isLang, type Lang } from './i18n';
 import { PROJECTIONS } from './projections';
 
 export interface AppState {
@@ -7,6 +8,8 @@ export interface AppState {
   showGraticule: boolean;
   showLand: boolean;
   showTissot: boolean;
+  /** UI 言語。既定は navigator.language から判定 */
+  lang: Lang;
 }
 
 export const DEFAULT_STATE: Readonly<AppState> = {
@@ -16,6 +19,7 @@ export const DEFAULT_STATE: Readonly<AppState> = {
   showGraticule: true,
   showLand: true,
   showTissot: false,
+  lang: detectLang(),
 };
 
 function parseBool(v: string | null, fallback: boolean): boolean {
@@ -41,6 +45,9 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
   state.showLand = parseBool(q.get('land'), DEFAULT_STATE.showLand);
   state.showTissot = parseBool(q.get('tissot'), DEFAULT_STATE.showTissot);
 
+  const lang = q.get('lang');
+  if (isLang(lang)) state.lang = lang;
+
   return state;
 }
 
@@ -53,6 +60,8 @@ export function stateToQuery(state: AppState): string {
   if (state.showGraticule !== DEFAULT_STATE.showGraticule) q.set('grat', state.showGraticule ? '1' : '0');
   if (state.showLand !== DEFAULT_STATE.showLand) q.set('land', state.showLand ? '1' : '0');
   if (state.showTissot !== DEFAULT_STATE.showTissot) q.set('tissot', state.showTissot ? '1' : '0');
+  // 自動判定と同じ言語なら書かない (共有先の閲覧者は自分の言語で開ける)
+  if (state.lang !== DEFAULT_STATE.lang) q.set('lang', state.lang);
   const s = q.toString();
   return s === '' ? window.location.pathname : `?${s}`;
 }

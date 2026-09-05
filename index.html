@@ -10,17 +10,18 @@
     />
   </head>
   <body>
-    <header class="wrap">
-      <h1>Equal Earth 図法ビューア</h1>
+    <header class="wrap header">
+      <h1 data-i18n="title">Equal Earth 図法ビューア</h1>
+      <button id="lang-toggle" class="lang" type="button" data-i18n="lang.switch" data-i18n-aria="lang.switch.aria">English</button>
     </header>
 
     <div class="wrap map-wrap">
-      <svg id="map" role="img" aria-label="選択した図法で描いた世界地図"></svg>
+      <svg id="map" role="img" data-i18n-aria="map.aria" aria-label="選択した図法で描いた世界地図"></svg>
     </div>
 
-    <section class="wrap panel" aria-label="中央経線の操作">
+    <section class="wrap panel" data-i18n-aria="panel.lon.aria" aria-label="中央経線の操作">
       <div class="row">
-        <label for="lon-slider">中央経線</label>
+        <label for="lon-slider" data-i18n="lon.label">中央経線</label>
         <input id="lon-slider" class="grow" type="range" min="-180" max="180" step="1" value="-90" />
         <input
           id="lon-number"
@@ -29,51 +30,51 @@
           max="180"
           step="1"
           value="-90"
-          aria-label="中央経線(度)"
+          data-i18n-aria="lon.number.aria" aria-label="中央経線(度)"
         />
         <span class="unit">°</span>
       </div>
 
       <div class="row readouts">
-        <span>中央 <strong id="lon-readout">—</strong></span>
+        <span><span data-i18n="readout.center">中央</span> <strong id="lon-readout">—</strong></span>
         <span class="sep">/</span>
-        <span>裂け目 <strong id="seam-readout">—</strong></span>
+        <span><span data-i18n="readout.seam">裂け目</span> <strong id="seam-readout">—</strong></span>
       </div>
 
       <div class="row">
-        <button class="preset" type="button" data-lon="-90">アメリカ中心 90°W</button>
-        <button class="preset" type="button" data-lon="150">太平洋中心 150°E</button>
-        <button class="preset" type="button" data-lon="10">ヨーロッパ・アフリカ中心 10°E</button>
+        <button class="preset" type="button" data-lon="-90" data-i18n="preset.americas">アメリカ中心 90°W</button>
+        <button class="preset" type="button" data-lon="150" data-i18n="preset.pacific">太平洋中心 150°E</button>
+        <button class="preset" type="button" data-lon="10" data-i18n="preset.europe">ヨーロッパ・アフリカ中心 10°E</button>
         <button id="spin" type="button" aria-pressed="false">回す</button>
       </div>
-      <p class="note">地図を左右にドラッグ (スワイプ) しても回せます。</p>
+      <p class="note" data-i18n="drag.hint">地図を左右にドラッグ (スワイプ) しても回せます。</p>
     </section>
 
-    <section class="wrap panel" aria-label="表示の設定">
+    <section class="wrap panel" data-i18n-aria="panel.view.aria" aria-label="表示の設定">
       <div class="row">
-        <label for="proj-select">図法</label>
+        <label for="proj-select" data-i18n="proj.label">図法</label>
         <select id="proj-select"></select>
       </div>
       <p id="proj-note" class="note">—</p>
 
       <div class="row toggles">
-        <label><input type="checkbox" id="toggle-land" checked /> 陸地</label>
-        <label><input type="checkbox" id="toggle-graticule" checked /> 経緯線</label>
-        <label><input type="checkbox" id="toggle-tissot" /> ティソーの指示楕円</label>
+        <label><input type="checkbox" id="toggle-land" checked /> <span data-i18n="toggle.land">陸地</span></label>
+        <label><input type="checkbox" id="toggle-graticule" checked /> <span data-i18n="toggle.graticule">経緯線</span></label>
+        <label><input type="checkbox" id="toggle-tissot" /> <span data-i18n="toggle.tissot">ティソーの指示楕円</span></label>
       </div>
 
       <div class="row">
-        <button id="export-svg" type="button">SVG を保存</button>
-        <button id="export-png" type="button">PNG を保存 (2x)</button>
+        <button id="export-svg" type="button" data-i18n="export.svg">SVG を保存</button>
+        <button id="export-png" type="button" data-i18n="export.png">PNG を保存 (2x)</button>
       </div>
     </section>
 
     <footer class="wrap">
-      <p>
+      <p data-i18n-html="footer.tissot">
         ティソーの指示楕円は半径約 500 km の円を 30° 間隔に並べたものです。
         どの図法も正積なので<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。
       </p>
-      <p class="src">
+      <p class="src" data-i18n-html="footer.src">
         図法: Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／
         描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)
       </p>

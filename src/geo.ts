@@ -1,3 +1,4 @@
+import { t, type Lang } from './i18n';
 import { geoGraticule, geoCircle, type GeoSphere } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { FeatureCollection, Geometry, LineString, MultiLineString, Polygon } from 'geojson';
@@ -63,9 +64,9 @@ export function wrapLon(lon: number): number {
 }
 
 /** 経度を教材向けの日本語表記に。 */
-export function formatLon(lon: number): string {
+export function formatLon(lon: number, lang: Lang = 'ja'): string {
   const x = Math.round(wrapLon(lon));
-  if (x === 0) return '0°(本初子午線)';
-  if (x === -180) return '180°(日付変更線付近)';
-  return x > 0 ? `東経 ${x}°` : `西経 ${-x}°`;
+  if (x === 0) return t(lang, 'lon.prime');
+  if (x === -180) return t(lang, 'lon.antimeridian');
+  return x > 0 ? t(lang, 'lon.east', { n: x }) : t(lang, 'lon.west', { n: -x });
 }

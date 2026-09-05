@@ -1,7 +1,7 @@
 # CLAUDE.md — equal-earth-viewer
 
 Equal Earth 図法の世界地図を描き、中央経線をインタラクティブに動かせる単一ページのウェブアプリ。
-地図図法の教材として使う。日本語 UI。
+地図図法の教材として使う。UI は日本語 / 英語 (`navigator.language` で自動判定、`?lang=` と切替ボタンで上書き)。
 
 ## 実行
 
@@ -21,7 +21,7 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 ## 配布
 
 `npm run build` の成果物は **`docs/index.html` ただ 1 つ** (約 94 KB)。JS / CSS / 海岸線 TopoJSON を
-すべて inline 済みなので、以下のいずれでもそのまま動く:
+すべて inline 済み (UI 文字列の ja / en 両方を含む) なので、以下のいずれでもそのまま動く:
 
 - ファイルをダブルクリック (`file://` で開く。ビルド環境もネットワークも不要)
 - USB / メール / Dropbox で配布
@@ -36,6 +36,7 @@ scripts/verify.mjs  投影ロジックの回帰テスト
 src/
   main.ts           起動・状態の集約・render の呼び出し
   state.ts          AppState の型と URL 同期
+  i18n.ts           UI 文字列の ja / en 辞書と data-i18n 適用 (別ページは作らない)
   projections.ts    図法の定義一覧 (名前・ファクトリ・極が線か。すべて正積)
   geo.ts            陸地 / 経緯線 / 赤道 / ティソー円の GeoJSON
   map.ts            描画ロジック (renderInto に集約)
@@ -57,6 +58,7 @@ src/
 | `lon` | 中央経線 (-180〜180)。既定は -90 (アメリカ中心) |
 | `proj` | `equal-earth` / `mollweide` / `eckert4` / `gall-peters` (すべて正積) |
 | `grat` `land` `tissot` | 各レイヤの表示 (`1` / `0`) |
+| `lang` | `ja` / `en`。自動判定と同じなら書かない (共有先は自分の言語で開く) |
 
 ## 触るときの注意
 

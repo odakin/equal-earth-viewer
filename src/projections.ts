@@ -1,4 +1,5 @@
 import { geoEqualEarth, type GeoProjection } from 'd3-geo';
+import { t, type Lang } from './i18n';
 import {
   geoMollweide,
   geoEckert4,
@@ -12,7 +13,7 @@ export interface ProjectionDef {
   create: () => GeoProjection;
   /** 極が線として描かれるか (点なら false) */
   poleLine: boolean;
-  note: string;
+  note: Record<Lang, string>;
 }
 
 /** すべて正積 (面積を正しく保つ) 図法。非正積は入れない (DESIGN.md)。 */
@@ -22,28 +23,40 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
     label: 'Equal Earth',
     create: () => geoEqualEarth(),
     poleLine: false,
-    note: '見た目の自然さと厳密な正積を両立させた 2018 年の図法 (Šavrič–Patterson–Jenny)。',
+    note: {
+      ja: '見た目の自然さと厳密な正積を両立させた 2018 年の図法 (Šavrič–Patterson–Jenny)。',
+      en: 'A 2018 projection combining a natural look with exact equal-area (Šavrič–Patterson–Jenny).',
+    },
   },
   {
     id: 'mollweide',
     label: 'Mollweide',
     create: () => geoMollweide(),
     poleLine: false,
-    note: '外周が楕円。極付近の形の歪みが大きい。',
+    note: {
+      ja: '外周が楕円。極付近の形の歪みが大きい。',
+      en: 'Elliptical outline. Strong shape distortion near the poles.',
+    },
   },
   {
     id: 'eckert4',
     label: 'Eckert IV',
     create: () => geoEckert4(),
     poleLine: true,
-    note: '極を赤道の半分の長さの線にして、高緯度の潰れを緩める。',
+    note: {
+      ja: '極を赤道の半分の長さの線にして、高緯度の潰れを緩める。',
+      en: 'Poles are lines half the equator length, easing the high-latitude squash.',
+    },
   },
   {
     id: 'gall-peters',
     label: 'Gall-Peters',
     create: () => geoCylindricalEqualArea().parallel(45),
     poleLine: true,
-    note: '標準緯線 45° の円筒図法。高緯度の形が極端に縦長になる。',
+    note: {
+      ja: '標準緯線 45° の円筒図法。高緯度の形が極端に縦長になる。',
+      en: 'Cylindrical with standard parallels at 45°. High-latitude shapes become extremely tall.',
+    },
   },
 ];
 
@@ -52,7 +65,7 @@ export function findProjection(id: string): ProjectionDef {
 }
 
 /** 図法のメタ情報を 1 行で。 */
-export function describeProjection(def: ProjectionDef): string {
-  const pole = def.poleLine ? '極は線' : '極は点';
-  return `${pole} — ${def.note}`;
+export function describeProjection(def: ProjectionDef, lang: Lang): string {
+  const pole = t(lang, def.poleLine ? 'pole.line' : 'pole.point');
+  return `${pole} — ${def.note[lang]}`;
 }

@@ -40,7 +40,20 @@ body {
 
 h1 {
   font-size: 1.3rem;
-  margin: 0 0 0.6rem;
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.lang {
+  font-size: 0.85em;
+  padding: 0.25rem 0.6rem;
 }
 
 .panel {

@@ -11,6 +11,7 @@
   `touch-action: pan-y` で縦スクロールは譲る。マウス drag + 合成 touch pointer で動作確認済)
 - **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 10°E / 150°E) のみ (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
+- **英語 UI** (同一ファイル内 ja/en 切替、`navigator.language` 自動判定 + `?lang=` + ボタン。理由 = DESIGN.md)
 - **修正**: URL に `lon` が無いとき `Number(null) = 0` で既定値を潰していた
   (既定が 0 の間は見えなかった。既定変更で即露見)
 

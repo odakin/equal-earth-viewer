@@ -1,5 +1,6 @@
 import { downloadPng, downloadSvg } from './export';
 import { formatLon, wrapLon } from './geo';
+import { applyLang, t } from './i18n';
 import { PROJECTIONS, describeProjection, findProjection } from './projections';
 import type { AppState } from './state';
 
@@ -39,7 +40,7 @@ export function wireControls(host: ControlsHost): void {
     if (!spinning) return;
     spinning = false;
     cancelAnimationFrame(rafId);
-    spinBtn.textContent = '回す';
+    spinBtn.textContent = t(host.getState().lang, 'spin.start');
     spinBtn.setAttribute('aria-pressed', 'false');
     // 回転中は URL を更新していないので、止まった位置をここで確定する
     host.setState({}, true);
@@ -57,7 +58,7 @@ export function wireControls(host: ControlsHost): void {
     if (spinning) return;
     spinning = true;
     lastTime = 0;
-    spinBtn.textContent = '停止';
+    spinBtn.textContent = t(host.getState().lang, 'spin.stop');
     spinBtn.setAttribute('aria-pressed', 'true');
     rafId = requestAnimationFrame(step);
   }
@@ -79,6 +80,10 @@ export function wireControls(host: ControlsHost): void {
   spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
 
   wireMapDrag(host, stopSpin);
+
+  must<HTMLButtonElement>('#lang-toggle').addEventListener('click', () => {
+    host.setState({ lang: host.getState().lang === 'ja' ? 'en' : 'ja' }, true);
+  });
 
   projSelect.addEventListener('change', () => {
     host.setState({ projectionId: projSelect.value }, true);
@@ -150,6 +155,16 @@ function wireMapDrag(host: ControlsHost, stopSpin: () => void): void {
 
 /** state の値を各コントロールの表示に反映する (描画のたびに呼ぶ)。 */
 export function syncControlsUi(state: AppState): void {
+  if (document.documentElement.lang !== state.lang) {
+    applyLang(state.lang);
+    // 「回す / 停止」は applyLang の対象外 (状態依存) なので、押下中でなければここで揃える
+    const spinBtn = must<HTMLButtonElement>('#spin');
+    if (spinBtn.getAttribute('aria-pressed') !== 'true') {
+      spinBtn.textContent = t(state.lang, 'spin.start');
+    } else {
+      spinBtn.textContent = t(state.lang, 'spin.stop');
+    }
+  }
   const rounded = Math.round(state.lon);
   const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
@@ -163,9 +178,10 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
 
-  must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon);
-  must<HTMLElement>('#seam-readout').textContent = formatLon(state.lon + 180);
+  must<HTMLElement>('#lon-readout').textContent = formatLon(state.lon, state.lang);
+  must<HTMLElement>('#seam-readout').textContent = formatLon(state.lon + 180, state.lang);
   must<HTMLElement>('#proj-note').textContent = describeProjection(
     findProjection(state.projectionId),
+    state.lang,
   );
 }
