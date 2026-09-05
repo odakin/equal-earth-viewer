@@ -1,7 +1,7 @@
 import { geoPath, type GeoProjection } from 'd3-geo';
 import { COUNTRIES, GRATICULE, HIGH, LOW, SPHERE, countryColorIndex, countryName, tissotCircles, type Dataset } from './geo';
 import { findProjection, type ProjectionDef } from './projections';
-import type { AppState } from './state';
+import { ZOOM_MAX, type AppState } from './state';
 import type { Theme } from './theme';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -207,6 +207,13 @@ export function renderInto(svg: SVGSVGElement, state: AppState, theme: Theme, de
 /** 国名ラベルの画面上の文字サイズ (px)。拡大しても画面上ではこの大きさのまま */
 const LABEL_PX = 9;
 
+/**
+ * 最大倍率で許す「国の幅からのはみ出し」(画面 px)。倍率 1 では 0、倍率とともに線形に増える。
+ * 寄るほど隣国は画面上で遠ざかるので、はみ出しても重ならない。最大倍率では長い国名でも収まる
+ * 値にして、全単位の名前が出るようにする (user 指摘「閾値が厳しすぎ」2026-09-05)。
+ */
+const LABEL_SLACK_PX_AT_MAX = 200;
+
 /** 文字列の幅を文字サイズの倍数で見積もる (CJK ≒ 1 文字幅、英数 ≒ 0.55) */
 function textWidthEm(s: string): number {
   let w = 0;
@@ -215,7 +222,7 @@ function textWidthEm(s: string): number {
 }
 
 /**
- * 国名ラベル。全国ぶん置くが、「文字が国の幅に収まる」ものだけ表示する。
+ * 国名ラベル。全国ぶん置くが、「文字が国の幅 + 倍率に応じたはみ出し許容に収まる」ものだけ表示する。
  * 文字は画面上で一定サイズ (SVG 単位では 1/zoom) なので、寄るほど小さい国の名前が現れる。
  * 国の幅は正積の性質から sqrt(球面面積 × scale²) で見積もる (回転で変わらず、毎フレーム安い)。
  */
@@ -233,6 +240,7 @@ function renderLabels(nodes: MapNodes, state: AppState, projection: GeoProjectio
   const rectWidth = svg.isConnected ? svg.getBoundingClientRect().width : 0;
   const svgPerPx = rectWidth > 0 ? MAP_WIDTH / state.zoom / rectWidth : 1 / state.zoom;
   const fontSvg = LABEL_PX * svgPerPx;
+  const slackSvg = (LABEL_SLACK_PX_AT_MAX * (state.zoom - 1)) / (ZOOM_MAX - 1) * svgPerPx;
   const k = projection.scale();
   COUNTRIES.forEach((c, i) => {
     const t = children.item(i) as SVGTextElement | null;
@@ -240,7 +248,7 @@ function renderLabels(nodes: MapNodes, state: AppState, projection: GeoProjectio
     const name = t.textContent ?? '';
     const width = textWidthEm(name) * fontSvg;
     const diameter = Math.sqrt(c.properties.area) * k;
-    const p = width <= diameter * 0.95 ? projection(c.properties.label) : null;
+    const p = width <= diameter * 0.95 + slackSvg ? projection(c.properties.label) : null;
     if (p === null) {
       t.style.display = 'none';
       return;

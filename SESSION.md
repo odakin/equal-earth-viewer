@@ -12,7 +12,7 @@
 - **配置**: 地図を操作パネルより上へ、リード文削除、プリセットは Patterson 3 版 (90°W / 0° / 150°E) のみ 〔当初 10°E と誤記、同日訂正〕 (user 指摘、DESIGN.md)
 - **図法を正積 4 つに絞る** (Robinson 削除、理由 = DESIGN.md。旧 `?proj=robinson` URL は既定に落ちる)
 - **海岸線 50m + 110m 2 段** (静止時 50m、ドラッグ中 110m。拡大上限 8 倍、単一 HTML 950 KB。国 key = name)
-- **国名の描き込み** (全国ぶん、文字が国の幅に収まるものだけ表示。画面上 9 px 固定 = 寄ると小国が現れる。置き場所 = NE LABEL_X/Y)
+- **国名の描き込み** (全国ぶん、文字が国の幅 + 倍率比例のはみ出し許容 〔最大 200 px〕 に収まるものだけ表示 = 8 倍で全 241 単位。画面上 9 px 固定 = 寄ると小国が現れる。置き場所 = NE LABEL_X/Y)
 - **拡大** (viewBox 切り出し 1〜3 倍、ホイール / ピンチ、縦ドラッグでパン、ダブルクリックで戻す。URL `z` `py`。110m のまま)
 - **国トグル** (MAPCOLOR9 で 9 色塗り分け 〔個別手直しなし、生成 = scripts/build-country-names.mjs〕 + 国境線 + hover / tap で国名、日英。データ = Natural Earth 110m → `src/data/country-names.json`、陸塊は countries の merge に切替、verify G)
 - **陸地トグル削除** (格子だけの図は趣旨外)
