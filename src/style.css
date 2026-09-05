@@ -148,6 +148,24 @@ button[aria-pressed='true'] {
   font-weight: 600;
 }
 
+/* 図法ボタン: 族ごとに 1 行、行頭に族名 */
+.proj-row {
+  margin: 0.3rem 0;
+}
+
+.family-label {
+  flex: 0 0 auto;
+  min-width: 4.5em;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.proj[aria-pressed='true'] {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
 .map-wrap {
   margin-bottom: 1rem;
 }

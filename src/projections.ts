@@ -13,7 +13,7 @@ import {
   geoWagner7,
 } from 'd3-geo-projection';
 
-/** 図法の族。select の optgroup 見出しに使う (i18n key = `family.<id>`)。 */
+/** 図法の族。図法ボタン列の行頭見出しに使う (i18n key = `family.<id>`)。 */
 export type Family = 'pseudocylindrical' | 'cylindrical' | 'lenticular' | 'pseudoconic' | 'azimuthal';
 
 export interface ProjectionDef {

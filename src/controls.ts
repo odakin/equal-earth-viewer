@@ -23,18 +23,25 @@ export function wireControls(host: ControlsHost): void {
   const slider = must<HTMLInputElement>('#lon-slider');
   const number = must<HTMLInputElement>('#lon-number');
   const spinBtn = must<HTMLButtonElement>('#spin');
-  const projSelect = must<HTMLSelectElement>('#proj-select');
-
+  // 図法はプルダウンでなく押しボタンの並び (族ごとに 1 行)。文言は syncControlsUi が言語に合わせて流し込む。
+  const projList = must<HTMLElement>('#proj-list');
   for (const family of FAMILIES) {
-    const group = document.createElement('optgroup');
-    group.dataset['family'] = family;
+    const row = document.createElement('div');
+    row.className = 'row proj-row';
+    const head = document.createElement('span');
+    head.className = 'family-label';
+    head.dataset['family'] = family;
+    row.appendChild(head);
     for (const def of PROJECTIONS) {
       if (def.family !== family) continue;
-      const opt = document.createElement('option');
-      opt.value = def.id;
-      group.appendChild(opt);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'proj';
+      btn.dataset['id'] = def.id;
+      btn.addEventListener('click', () => host.setState({ projectionId: def.id }, true));
+      row.appendChild(btn);
     }
-    projSelect.appendChild(group);
+    projList.appendChild(row);
   }
 
   let spinning = false;
@@ -88,10 +95,6 @@ export function wireControls(host: ControlsHost): void {
 
   must<HTMLButtonElement>('#lang-toggle').addEventListener('click', () => {
     host.setState({ lang: host.getState().lang === 'ja' ? 'en' : 'ja' }, true);
-  });
-
-  projSelect.addEventListener('change', () => {
-    host.setState({ projectionId: projSelect.value }, true);
   });
 
   const toggles: ReadonlyArray<[string, keyof AppState]> = [
@@ -178,14 +181,14 @@ export function syncControlsUi(state: AppState): void {
   if (document.activeElement !== slider) slider.value = String(rounded);
   if (document.activeElement !== number) number.value = String(rounded);
 
-  const projSelect = must<HTMLSelectElement>('#proj-select');
-  for (const opt of projSelect.options) {
-    opt.textContent = findProjection(opt.value).label[state.lang];
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('#proj-list .proj')) {
+    const id = btn.dataset['id'] ?? '';
+    btn.textContent = findProjection(id).label[state.lang];
+    btn.setAttribute('aria-pressed', id === state.projectionId ? 'true' : 'false');
   }
-  for (const group of projSelect.querySelectorAll('optgroup')) {
-    group.label = t(state.lang, `family.${group.dataset['family'] ?? ''}`);
+  for (const head of document.querySelectorAll<HTMLElement>('#proj-list .family-label')) {
+    head.textContent = t(state.lang, `family.${head.dataset['family'] ?? ''}`);
   }
-  projSelect.value = state.projectionId;
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;
