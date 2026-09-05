@@ -8,7 +8,7 @@ import {
 
 export interface ProjectionDef {
   id: string;
-  label: string;
+  label: Record<Lang, string>;
   /** 素の投影を作る。中央経線・拡大率は map.ts 側が設定する。 */
   create: () => GeoProjection;
   /** 極が線として描かれるか (点なら false) */
@@ -20,17 +20,17 @@ export interface ProjectionDef {
 export const PROJECTIONS: readonly ProjectionDef[] = [
   {
     id: 'equal-earth',
-    label: 'Equal Earth',
+    label: { ja: 'イコールアース', en: 'Equal Earth' },
     create: () => geoEqualEarth(),
     poleLine: false,
     note: {
-      ja: '見た目の自然さと厳密な正積を両立させた 2018 年の図法 (Šavrič–Patterson–Jenny)。',
+      ja: '見た目の自然さと厳密な正積を両立させた 2018 年の図法 (出典は脚注)。',
       en: 'A 2018 projection combining a natural look with exact equal-area (Šavrič–Patterson–Jenny).',
     },
   },
   {
     id: 'mollweide',
-    label: 'Mollweide',
+    label: { ja: 'モルワイデ', en: 'Mollweide' },
     create: () => geoMollweide(),
     poleLine: false,
     note: {
@@ -40,7 +40,7 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
   },
   {
     id: 'eckert4',
-    label: 'Eckert IV',
+    label: { ja: 'エケルト第4', en: 'Eckert IV' },
     create: () => geoEckert4(),
     poleLine: true,
     note: {
@@ -50,7 +50,7 @@ export const PROJECTIONS: readonly ProjectionDef[] = [
   },
   {
     id: 'gall-peters',
-    label: 'Gall-Peters',
+    label: { ja: 'ゴール・ピーターズ', en: 'Gall-Peters' },
     create: () => geoCylindricalEqualArea().parallel(45),
     poleLine: true,
     note: {

@@ -18,16 +18,16 @@ export function isLang(v: string | null): v is Lang {
 type Dict = Record<string, string>;
 
 const JA: Dict = {
-  title: 'Equal Earth 図法ビューア',
+  title: 'イコールアース図法ビューア',
   'map.aria': '選択した図法で描いた世界地図',
   'panel.lon.aria': '中央経線の操作',
   'lon.label': '中央経線',
   'lon.number.aria': '中央経線(度)',
   'readout.center': '中央',
   'readout.seam': '裂け目',
-  'preset.americas': 'アメリカ中心 90°W',
-  'preset.pacific': '太平洋中心 150°E',
-  'preset.europe': 'ヨーロッパ・アフリカ中心 10°E',
+  'preset.americas': 'アメリカ中心 西経90°',
+  'preset.pacific': '太平洋中心 東経150°',
+  'preset.europe': 'ヨーロッパ・アフリカ中心 東経10°',
   'spin.start': '回す',
   'spin.stop': '停止',
   'drag.hint': '地図を左右にドラッグ (スワイプ) しても回せます。',
@@ -41,7 +41,7 @@ const JA: Dict = {
   'footer.tissot':
     'ティソーの指示楕円は半径約 500 km の円を 30° 間隔に並べたものです。どの図法も正積なので<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。',
   'footer.src':
-    '図法: Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)',
+    '図法: イコールアース = Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／ 描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)',
   'lang.switch': 'English',
   'lang.switch.aria': '英語に切り替え',
   'pole.point': '極は点',

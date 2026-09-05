@@ -28,7 +28,7 @@ export function wireControls(host: ControlsHost): void {
   for (const def of PROJECTIONS) {
     const opt = document.createElement('option');
     opt.value = def.id;
-    opt.textContent = def.label;
+    opt.textContent = def.label[host.getState().lang];
     projSelect.appendChild(opt);
   }
 
@@ -173,7 +173,11 @@ export function syncControlsUi(state: AppState): void {
   if (document.activeElement !== slider) slider.value = String(rounded);
   if (document.activeElement !== number) number.value = String(rounded);
 
-  must<HTMLSelectElement>('#proj-select').value = state.projectionId;
+  const projSelect = must<HTMLSelectElement>('#proj-select');
+  for (const opt of projSelect.options) {
+    opt.textContent = findProjection(opt.value).label[state.lang];
+  }
+  projSelect.value = state.projectionId;
   must<HTMLInputElement>('#toggle-graticule').checked = state.showGraticule;
   must<HTMLInputElement>('#toggle-land').checked = state.showLand;
   must<HTMLInputElement>('#toggle-tissot').checked = state.showTissot;

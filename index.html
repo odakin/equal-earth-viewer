@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Equal Earth 図法ビューア</title>
+    <title>イコールアース図法ビューア</title>
     <meta
       name="description"
-      content="Equal Earth 図法の世界地図で、中央経線を動かして裂け目の位置と面積の歪みを観察する教材。"
+      content="イコールアース (Equal Earth) 図法の世界地図で、中央経線を動かして裂け目の位置と面積の歪みを観察する教材。"
     />
   </head>
   <body>
     <header class="wrap header">
-      <h1 data-i18n="title">Equal Earth 図法ビューア</h1>
+      <h1 data-i18n="title">イコールアース図法ビューア</h1>
       <button id="lang-toggle" class="lang" type="button" data-i18n="lang.switch" data-i18n-aria="lang.switch.aria">English</button>
     </header>
 
@@ -42,9 +42,9 @@
       </div>
 
       <div class="row">
-        <button class="preset" type="button" data-lon="-90" data-i18n="preset.americas">アメリカ中心 90°W</button>
-        <button class="preset" type="button" data-lon="150" data-i18n="preset.pacific">太平洋中心 150°E</button>
-        <button class="preset" type="button" data-lon="10" data-i18n="preset.europe">ヨーロッパ・アフリカ中心 10°E</button>
+        <button class="preset" type="button" data-lon="-90" data-i18n="preset.americas">アメリカ中心 西経90°</button>
+        <button class="preset" type="button" data-lon="150" data-i18n="preset.pacific">太平洋中心 東経150°</button>
+        <button class="preset" type="button" data-lon="10" data-i18n="preset.europe">ヨーロッパ・アフリカ中心 東経10°</button>
         <button id="spin" type="button" aria-pressed="false">回す</button>
       </div>
       <p class="note" data-i18n="drag.hint">地図を左右にドラッグ (スワイプ) しても回せます。</p>
@@ -75,7 +75,7 @@
         どの図法も正積なので<strong>どの円も面積が等しく</strong>、形の崩れだけが歪みとして現れます。
       </p>
       <p class="src" data-i18n-html="footer.src">
-        図法: Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／
+        図法: イコールアース = Šavrič, Patterson &amp; Jenny (2018), <em>Int. J. Geogr. Inf. Sci.</em> ／
         描画: d3-geo ／ 海岸線: Natural Earth (world-atlas 110m)
       </p>
     </footer>
