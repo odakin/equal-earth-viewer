@@ -4,7 +4,7 @@
 
 操作欄整理・国名表示の緩和・自転方向の修正は公開済み。
 追加修正: 中心プリセットで緯度も既定値へ戻し、方位図法の選択表示は緯度も照合。公開許可を得てpush済み。
-追加修正: 自動回転のON/OFFを `spin=1` でURL同期・復元。ローカル実装済み・公開保留。
+追加修正: 自動回転のON/OFFを `spin=1` でURL同期・復元。公開許可取得済み。URLからの再開・停止・再読み込みを検証済み。
 公開 = **https://odakin.github.io/equal-earth-viewer/**
 (GitHub Pages、`master` の `docs/` から配信)。
 
@@ -32,7 +32,7 @@
 
 ## 引き継ぎ
 
-- 自動回転のURL同期の公開許可待ち。今回の一般則は共通の `web-map-projections.md` に昇格済み、DESIGN.md から該当節を参照。
+- 未完了の実装作業なし。今回の一般則は共通の `web-map-projections.md` に昇格済み、DESIGN.md から該当節を参照。
 
 ## 次にやるなら
 
