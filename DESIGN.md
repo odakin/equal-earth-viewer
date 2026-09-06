@@ -66,8 +66,8 @@ UI 側の色は `style.css` の CSS 変数が持つ (別系統)。
 
 ## 自転方向の回転と URL 同期
 
-「回す」は西から東への自転を表す。`rotate([-lon, 0, south])` で陸地を東へ動かすため、
-中央経線 `lon` は毎秒30°減らす。北が上なら陸地は右へ、南が上なら左へ流れる。
+自動回転は地球の自転方向とし、速度の正本は `src/controls.ts`。
+符号と座標による検証の一般則は[共通規約 §自転と中央経線](https://github.com/odakin/claude-config/blob/main/conventions/web-map-projections.md#earth-spin-sign)。
 
 
 `history.replaceState` を毎フレーム呼ぶのは無駄なので、`setState` に `commit` 引数を設け、
@@ -297,13 +297,10 @@ user が「個別に手で、はやめよう」。MAPCOLOR7 / 8 / 9 / 13 を比�
 西サハラ→モロッコになり政治的主張を帯びる)。
 タップ判定はドラッグ側で「4 px 未満で離した」を `maptap` として発火。
 
-**国名の描き込み**: 全国ぶん `<text>` を置き、文字サイズは画面上で一定の9pxを保つ。
-候補条件は「文字幅 ≤ sqrt(球面面積) × scale × 2.5 + はみ出し許容」。面積の平方根は
-実際の横幅ではないため、旧係数0.95では長い日本語名の大国まで非表示になっていた。
-はみ出し許容は倍率1で0、最大倍率で200px。候補にした後、大国から順に配置し、
-文字幅の推定矩形と2pxの間隔で衝突を判定する。重なる小国は非表示にし、hover / tapで読める。
-360px幅・等倍の日本語で、米国・中国・オーストラリアが候補に入ることを確認。
-置き場所はNEのLABEL_X / LABEL_Y、文字は南を上にしても水平。画面と書き出しは同じ判定を使う。
+**国名の描き込み**: 文字サイズを維持し、等倍でも米国・中国・オーストラリアを表示できる
+候補条件にする。重なる場合は大国を優先し、表示されない国は hover / tap で補う。
+調整値と実装の正本は `src/map.ts`。一般的な判定・検証方法は
+[共通規約 §国名配置](https://github.com/odakin/claude-config/blob/main/conventions/web-map-projections.md#country-label-placement)。
 
 ## 拡大は viewBox の切り出し (1〜8 倍)
 
@@ -351,3 +348,6 @@ commit=false (ドラッグ・回転・ピンチ中) は 110m を描く。国名�
 [WCAG 2.2](https://www.w3.org/TR/WCAG22/) の操作対象・フォーカス可視性を参照。
 操作パネルの対象は高さ44px以上、キーボードフォーカスは3pxの輪郭。
 狭い画面では回転・上下反転の次の行に国表示を置く。
+
+操作のグループ化と状態表現の一般則は
+[共通規約 §操作欄](https://github.com/odakin/claude-config/blob/main/conventions/web-map-projections.md#control-grouping)。
