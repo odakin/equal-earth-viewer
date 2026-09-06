@@ -4,7 +4,7 @@ import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
 import { clampZoom, type AppState } from './state';
 
-/** 「回す」の角速度 (度/秒)。 */
+/** 地球の自転を表す角速度 (度/秒)。陸地を東へ動かすため中央経線は西へ進める。 */
 const SPIN_DEG_PER_SEC = 30;
 
 function must<T extends Element>(selector: string): T {
@@ -62,7 +62,7 @@ export function wireControls(host: ControlsHost): void {
     if (!spinning) return;
     const dt = lastTime === 0 ? 0 : (now - lastTime) / 1000;
     lastTime = now;
-    host.setState({ lon: wrapLon(host.getState().lon + SPIN_DEG_PER_SEC * dt) }, false);
+    host.setState({ lon: wrapLon(host.getState().lon - SPIN_DEG_PER_SEC * dt) }, false);
     rafId = requestAnimationFrame(step);
   }
 
