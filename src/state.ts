@@ -13,6 +13,8 @@ export interface AppState {
   showCountries: boolean;
   /** 南を上にする (地図全体を 180° 回転。鏡像ではない) */
   southUp: boolean;
+  /** 自動回転。URL の spin=1 から復元する。 */
+  spinning: boolean;
   /** 拡大率 1〜3 (viewBox を切り出す)。1 = 全体 */
   zoom: number;
   /** 拡大時の縦のずらし (SVG 座標)。横は回転で代替するので持たない */
@@ -30,6 +32,7 @@ export const DEFAULT_STATE: Readonly<AppState> = {
   showTissot: false,
   showCountries: false,
   southUp: false,
+  spinning: false,
   zoom: 1,
   panY: 0,
   lang: detectLang(),
@@ -69,6 +72,7 @@ export function readStateFromUrl(search: string = window.location.search): AppSt
   state.showTissot = parseBool(q.get('tissot'), DEFAULT_STATE.showTissot);
   state.showCountries = parseBool(q.get('countries'), DEFAULT_STATE.showCountries);
   state.southUp = parseBool(q.get('south'), DEFAULT_STATE.southUp);
+  state.spinning = parseBool(q.get('spin'), DEFAULT_STATE.spinning);
   const z = q.get('z');
   if (z !== null && Number.isFinite(Number(z))) state.zoom = clampZoom(Number(z));
   const py = q.get('py');
@@ -93,6 +97,7 @@ export function stateToQuery(state: AppState): string {
   if (state.showTissot !== DEFAULT_STATE.showTissot) q.set('tissot', state.showTissot ? '1' : '0');
   if (state.showCountries !== DEFAULT_STATE.showCountries) q.set('countries', state.showCountries ? '1' : '0');
   if (state.southUp !== DEFAULT_STATE.southUp) q.set('south', state.southUp ? '1' : '0');
+  if (state.spinning) q.set('spin', '1');
   if (state.zoom !== DEFAULT_STATE.zoom) q.set('z', state.zoom.toFixed(1));
   if (state.zoom !== DEFAULT_STATE.zoom && Math.round(state.panY) !== 0) q.set('py', String(Math.round(state.panY)));
   // 自動判定と同じ言語なら書かない (共有先の閲覧者は自分の言語で開ける)

@@ -44,22 +44,19 @@ export function wireControls(host: ControlsHost): void {
     projList.appendChild(row);
   }
 
-  let spinning = false;
   let rafId = 0;
   let lastTime = 0;
 
   function stopSpin(): void {
-    if (!spinning) return;
-    spinning = false;
+    if (!host.getState().spinning) return;
     cancelAnimationFrame(rafId);
-    spinBtn.textContent = t(host.getState().lang, 'spin.start');
-    spinBtn.setAttribute('aria-pressed', 'false');
+    rafId = 0;
     // 回転中は URL を更新していないので、止まった位置をここで確定する
-    host.setState({}, true);
+    host.setState({ spinning: false }, true);
   }
 
   function step(now: number): void {
-    if (!spinning) return;
+    if (!host.getState().spinning) return;
     const dt = lastTime === 0 ? 0 : (now - lastTime) / 1000;
     lastTime = now;
     host.setState({ lon: wrapLon(host.getState().lon - SPIN_DEG_PER_SEC * dt) }, false);
@@ -67,11 +64,9 @@ export function wireControls(host: ControlsHost): void {
   }
 
   function startSpin(): void {
-    if (spinning) return;
-    spinning = true;
+    if (rafId !== 0) return;
     lastTime = 0;
-    spinBtn.textContent = t(host.getState().lang, 'spin.stop');
-    spinBtn.setAttribute('aria-pressed', 'true');
+    host.setState({ spinning: true }, true);
     rafId = requestAnimationFrame(step);
   }
 
@@ -93,11 +88,12 @@ export function wireControls(host: ControlsHost): void {
 
   function setLatByUser(value: number): void {
     if (!Number.isFinite(value)) return;
+    stopSpin();
     host.setState({ lat: Math.max(-90, Math.min(90, value)) }, true);
   }
   latNumber.addEventListener('input', () => setLatByUser(Number(latNumber.value)));
 
-  spinBtn.addEventListener('click', () => (spinning ? stopSpin() : startSpin()));
+  spinBtn.addEventListener('click', () => (host.getState().spinning ? stopSpin() : startSpin()));
 
   wireMapDrag(host, stopSpin);
   wireCountryTip(host);
@@ -129,6 +125,8 @@ export function wireControls(host: ControlsHost): void {
   must<HTMLButtonElement>('#export-png').addEventListener('click', () => {
     void downloadPng(host.getState());
   });
+
+  if (host.getState().spinning) startSpin();
 }
 
 /**
@@ -331,14 +329,10 @@ function wireCountryTip(host: ControlsHost): void {
 export function syncControlsUi(state: AppState): void {
   if (document.documentElement.lang !== state.lang) {
     applyLang(state.lang);
-    // 「回す / 停止」は applyLang の対象外 (状態依存) なので、押下中でなければここで揃える
-    const spinBtn = must<HTMLButtonElement>('#spin');
-    if (spinBtn.getAttribute('aria-pressed') !== 'true') {
-      spinBtn.textContent = t(state.lang, 'spin.start');
-    } else {
-      spinBtn.textContent = t(state.lang, 'spin.stop');
-    }
   }
+  const spinBtn = must<HTMLButtonElement>('#spin');
+  spinBtn.textContent = t(state.lang, state.spinning ? 'spin.stop' : 'spin.start');
+  spinBtn.setAttribute('aria-pressed', String(state.spinning));
   // 方位図法では緯度も含めて中心が一致する場合だけ選択表示する。
   const oblique = findProjection(state.projectionId).oblique === true;
   const defaultLatitude = !oblique || Math.abs(state.lat - DEFAULT_STATE.lat) < 1e-6;

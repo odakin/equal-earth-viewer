@@ -71,7 +71,9 @@ UI 側の色は `style.css` の CSS 変数が持つ (別系統)。
 
 
 `history.replaceState` を毎フレーム呼ぶのは無駄なので、`setState` に `commit` 引数を設け、
-回転中は描画のみ行う。停止時に一度だけ現在位置を URL へ確定する。
+回転中は描画のみ行う。開始・停止・他の設定変更時に現在位置を URL へ確定する。
+自動回転のON/OFFは `AppState.spinning` が正本で、`spin=1` を開くと回転を復元する。
+停止・手動の中心操作では `spin` を除去する。
 
 ## `d3-geo-projection` の型は自前で宣言する
 
