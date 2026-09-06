@@ -2,7 +2,7 @@ import { downloadPng, downloadSvg } from './export';
 import { countryName, wrapLon } from './geo';
 import { applyLang, t } from './i18n';
 import { FAMILIES, PROJECTIONS, describeProjection, findProjection } from './projections';
-import { clampZoom, type AppState } from './state';
+import { clampZoom, DEFAULT_STATE, type AppState } from './state';
 
 /** 地球の自転を表す角速度 (度/秒)。陸地を東へ動かすため中央経線は西へ進める。 */
 const SPIN_DEG_PER_SEC = 30;
@@ -85,7 +85,10 @@ export function wireControls(host: ControlsHost): void {
   number.addEventListener('input', () => setLonByUser(Number(number.value)));
 
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset')) {
-    btn.addEventListener('click', () => setLonByUser(Number(btn.dataset['lon'])));
+    btn.addEventListener('click', () => {
+      stopSpin();
+      host.setState({ lon: Number(btn.dataset['lon']), lat: DEFAULT_STATE.lat }, true);
+    });
   }
 
   function setLatByUser(value: number): void {
@@ -336,9 +339,11 @@ export function syncControlsUi(state: AppState): void {
       spinBtn.textContent = t(state.lang, 'spin.stop');
     }
   }
-  // 任意の経度では選択なし。丸めた表示値ではなく実際の中心と一致させる。
+  // 方位図法では緯度も含めて中心が一致する場合だけ選択表示する。
+  const oblique = findProjection(state.projectionId).oblique === true;
+  const defaultLatitude = !oblique || Math.abs(state.lat - DEFAULT_STATE.lat) < 1e-6;
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.preset')) {
-    btn.setAttribute('aria-pressed', String(Math.abs(state.lon - Number(btn.dataset['lon'])) < 1e-6));
+    btn.setAttribute('aria-pressed', String(defaultLatitude && Math.abs(state.lon - Number(btn.dataset['lon'])) < 1e-6));
   }
   const rounded = Math.round(state.lon);
   const number = must<HTMLInputElement>('#lon-number');
@@ -359,7 +364,6 @@ export function syncControlsUi(state: AppState): void {
   must<HTMLButtonElement>('#toggle-countries').setAttribute('aria-pressed', String(state.showCountries));
   must<HTMLButtonElement>('#toggle-south').setAttribute('aria-pressed', state.southUp ? 'true' : 'false');
 
-  const oblique = findProjection(state.projectionId).oblique === true;
   must<HTMLElement>('#lat-row').hidden = !oblique;
   must<HTMLElement>('#drag-hint').textContent = t(state.lang, oblique ? 'drag.hint.oblique' : 'drag.hint');
   must<SVGSVGElement>('#map').style.touchAction = oblique || state.zoom > 1 ? 'none' : 'pan-y';
