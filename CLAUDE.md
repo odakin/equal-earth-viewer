@@ -33,6 +33,13 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 Vite 7 → 8 で **302,146 → 300,515 bytes と減っている**。サイズを判断材料にするときは
 `gzip -9 -c docs/index.html | wc -c` で実測する。
 
+⚠️ **依存更新 PR の branch でビルドして測らない。** bot の branch は作成時点の base から
+分岐しているので、その後に本体が変わっていれば別物を測ることになる (2026-09-09: 依存更新
+branch のビルド出力は 100 KB = 国データ追加前の構成)。**現在の master に依存だけを当てて**
+測る (`git worktree` を切って `npm install <pkg>@<ver>`)。
+
+> 一般則の正本 = [`claude-config/conventions/debugging-discipline.md`](../claude-config/conventions/debugging-discipline.md) §15.5「tool の自己報告は測定値ではない」 / §15.6「古い base の branch で測った値は現在の値ではない」
+
 ## 構造
 
 ```
