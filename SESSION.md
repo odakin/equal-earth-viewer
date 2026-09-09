@@ -12,7 +12,7 @@
 - 操作 = ドラッグ (回転、方位図法は緯度も) / 数値入力 / プリセット 3 / 回す / 南を上に (180° 回転)
 - 表示 = 経緯線 / ティソー円 / 国 (MAPCOLOR9 塗り分け + 国境 + 国名描き込み + hover / tap)
 - 拡大 1〜8 倍 (viewBox 切り出し、動作中 110m・静止時 50m の 2 段)、日英 UI、URL 状態、SVG / PNG 書き出し
-- `npm run build` → `docs/index.html` 約 950 KB (gzip 306 KB)、`npm test` 全項目 pass
+- `npm run build` → `docs/index.html` 947 KB (実 gzip 約 301 KB)、`npm test` 全項目 pass
   (A 外郭不変 / A2 方位の緯度回転 / A3 南を上 / B・C 受け入れ / D path 生成 / E 極の実測 / F 正積の実測 / G 国名表)
 - security baseline 適用済 (Dependabot / CodeQL / Semgrep / push protection / branch protection / leak gate marker)
 

@@ -20,12 +20,18 @@ export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
 
 ## 配布
 
-`npm run build` の成果物は **`docs/index.html` ただ 1 つ** (約 950 KB、gzip 305 KB。海岸線 50m + 110m を同梱)。JS / CSS / 海岸線 TopoJSON を
+`npm run build` の成果物は **`docs/index.html` ただ 1 つ** (947 KB、実 gzip 約 301 KB。海岸線 50m + 110m を同梱)。JS / CSS / 海岸線 TopoJSON を
 すべて inline 済み (UI 文字列の ja / en 両方を含む) なので、以下のいずれでもそのまま動く:
 
 - ファイルをダブルクリック (`file://` で開く。ビルド環境もネットワークも不要)
 - USB / メール / Dropbox で配布
 - 静的ホスティングに設置 (GitHub Pages 等)
+
+⚠️ **`vite build` が出力する `gzip:` の数字を配布サイズとして引かない。** 実際の gzip と一致しない
+(2026-09-09 実測: Vite は 315.13 kB と表示するが `gzip -9` は 301 KB)。この食い違いのせいで
+「Vite 8 に上げると gzip が 9 KB 太る」と誤って読み、依存更新を一度見送りかけた。実際は
+Vite 7 → 8 で **302,146 → 300,515 bytes と減っている**。サイズを判断材料にするときは
+`gzip -9 -c docs/index.html | wc -c` で実測する。
 
 ## 構造
 
